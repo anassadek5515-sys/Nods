@@ -11,7 +11,7 @@ async function runFastSearchEngine() {
   console.log('🔍 جارِ تشغيل اسكربت البحث السريع لجلب مواقع الشركات...');
   
   const discoveredTargets = [];
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= 1000; i++) {
     discoveredTargets.push(`https://example-company-${Date.now()}-${i}.com/contact`);
   }
 
@@ -35,31 +35,26 @@ const server = http.createServer((req, res) => {
 
   const parsedUrl = url.parse(req.url, true);
 
-  // نقطة فحص الحالة والاطمئنان على الطابور
+  // نقطة فحص الحالة
   if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       status: 'active',
-      message: 'Outreach Core Server with Integrated Scraper is Running',
+      message: 'Unified Multi-Worker Outreach Server is Running',
       queuedTargets: globalTargetsQueue.length
     }));
     return;
   }
 
-  // نقطة تشغيل البحث يدوياً
-  if (parsedUrl.pathname === '/api/run-search' && req.method === 'POST') {
-    runFastSearchEngine();
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ success: true, message: 'تم تشغيل اسكربت البحث وجلب الروابط بنجاح', total: globalTargetsQueue.length }));
-    return;
-  }
-
-  // نقطة سحب الروابط للـ Workers
+  // نقطة سحب الروابط المخصصة للـ 6 سيرفرات
   if (parsedUrl.pathname === '/api/get-targets' && req.method === 'GET') {
-    const workerId = parsedUrl.query.workerId || 1;
+    const workerId = parsedUrl.query.workerId || 'unknown';
     
-    const batchSize = 100;
+    // سحب دفعة لكل سيرفر (مثلاً 50 رابط في كل طلب)
+    const batchSize = 50;
     const workerBatch = globalTargetsQueue.splice(0, batchSize);
+
+    console.log(`📦 السيرفر رقم [${workerId}] طلب روابط، وتم إرسال ${workerBatch.length} رابط له.`);
 
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
@@ -70,8 +65,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ error: 'Endpoint not found' }));
+  res.writeHead404 ? null : (res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' }), res.end(JSON.stringify({ error: 'Endpoint not found' })));
 });
 
 server.listen(PORT, () => {

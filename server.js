@@ -5,8 +5,8 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
         status: 'online',
-        message: 'Node is active and running successfully on Glitch!',
-        timestamp: new Date()
+        message: 'Node server is running with single-file deployment!',
+        timestamp: new Date().toISOString()
     }));
 });
 

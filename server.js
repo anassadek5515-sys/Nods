@@ -4,7 +4,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const PORT = process.env.PORT || 3000;
 
-// 1. تشغيل شات بوت تليجرام أوتوماتيكياً
+// 1. تشغيل شات بوت تليجرام أوتوماتيكياً بلغة المستخدم
 const token = process.env.TELEGRAM_BOT_TOKEN || '9266573110:AAFAu_U4pqonFIMJkszpF3GcsB3nKdLwUvg';
 const bot = new TelegramBot(token, { polling: true });
 
@@ -17,7 +17,7 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا أو في المنصة وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا أو في المنصة وسيتم التفعيل أوتوماتيكياً!`);
     } else {
       bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe and activate your automated system ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nOur official wallet:\n\`${MY_WALLET}\`\n\nAfter payment, send your TXID to activate instantly!`);
     }
@@ -30,7 +30,7 @@ bot.on('message', (msg) => {
   }
 });
 
-// 2. إعدادات السيرفر وتوليد الـ 40,000 شركة في الذاكرة أوتوماتيكياً
+// 2. محرك توليد الشركات والـ Workers على مدار 24 ساعة في الذاكرة
 const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
 let globalTargetsQueue = [];
 

@@ -3,11 +3,29 @@ const url = require('url');
 
 const PORT = process.env.PORT || 3000;
 
-// ذاكرة مؤقتة لحفظ الروابط التي يجلبها اسكربت البحث (يمكن ربطها بقاعدة بيانات لاحقاً)
+// ذاكرة مؤقتة لتخزين الروابط المستهدفة
 let globalTargetsQueue = [];
 
+// 1. دالة اسكربت البحث السريع (المدمجة داخلياً)
+async function runFastSearchEngine() {
+  console.log('🔍 جارِ تشغيل اسكربت البحث السريع لجلب مواقع الشركات...');
+  
+  // هنا محاكاة لاسكربت البحث اللي بيجيب الـ 40 ألف موقع في ثواني
+  // (تقدر تحط هنا منطق البحث الفعلي أو الـ Scraper الخاص بك)
+  const discoveredTargets = [];
+  for (let i = 1; i <= 100; i++) {
+    discoveredTargets.(`https://example-company-${Date.now()}-${i}.com/contact`);
+  }
+
+  // إضافة الروابط الجديدة للطابور العام
+  globalTargetsQueue = globalTargetsQueue.concat(discoveredTargets);
+  console.log(`✅ تم جلب وإضافة ${discoveredTargets.length} موقع جديد. الإجمالي في الطابور: ${globalTargetsQueue.length}`);
+}
+
+// تشغيل البحث تلقائياً عند بدء تشغيل السيرفر (أو يمكن جدولته)
+runFastSearchEngine();
+
 const server = http.createServer((req, res) => {
-  // إعدادات CORS للسماح بالاتصال من أي مكان
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,50 +38,30 @@ const server = http.createServer((req, res) => {
 
   const parsedUrl = url.parse(req.url, true);
 
-  // 1. نقطة فحص الحالة (Health Check)
+  // نقطة فحص الحالة والاطمئنان على الطابور
   if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       status: 'active',
-      message: 'Node outreach server is running smoothly',
+      message: 'Outreach Core Server with Integrated Scraper is Running',
       queuedTargets: globalTargetsQueue.length
     }));
     return;
   }
 
-  // 2. النقطة اللي هيفتحها اسكربت البحث السريع عشان يرمي الـ 40 ألف موقع دفعة واحدة
-  if (parsedUrl.pathname === '/api/upload-targets' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', () => {
-      try {
-        const payload = JSON.parse(body || '{}');
-        const incomingTargets = payload.targets || []; // الـ 40 ألف موقع
-        
-        // إضافة المواقع الجديدة للطابور
-        globalTargetsQueue = globalTargetsQueue.concat(incomingTargets);
-
-        console.log(`📥 تم استلام ${incomingTargets.length} موقع جديد! الإجمالي الحالي في الطابور: ${globalTargetsQueue.length}`);
-
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({
-          success: true,
-          message: `تم استقبال وتخزين الروابط بنجاح`,
-          totalQueued: globalTargetsQueue.length
-        }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
-      }
-    });
+  // زر تشغيل البحث يدوياً لو احتجت تجدد الداتا في أي وقت
+  if (parsedUrl.pathname === '/api/run-search' && req.method === 'POST') {
+    runFastSearchEngine();
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, message: 'تم تشغيل اسكربت البحث وجلب الروابط بنجاح', total: globalTargetsQueue.length }));
     return;
   }
 
-  // 3. النقطة اللي الـ 6 سيرفرات (Workers) هتسحب منها حصتها عشان تبدأ الإرسال
+  // نقطة سحب الروابط للـ 6 سيرفرات (Workers)
   if (parsedUrl.pathname === '/api/get-targets' && req.method === 'GET') {
     const workerId = parsedUrl.query.workerId || 1;
     
-    // سحب دفعة صغيرة (مثلاً أول 100 رابط لكل سيرفر وقت الطلب)
+    // سحب دفعة لكل سيرفر (مثلاً 100 رابط في كل طلب)
     const batchSize = 100;
     const workerBatch = globalTargetsQueue.splice(0, batchSize);
 
@@ -76,7 +74,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // في حال طلب مسار غير معروف
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });

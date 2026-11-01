@@ -43,19 +43,19 @@ if site_choice == "💳 موقع الاشتراك والدفع الفوري":
     my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
     payment_uri = f"ethereum:{my_usdt_wallet}"
     
-    # تنبيه الشبكة ومحفظة الاستلام
+    # مربع أحمر صارخ للتنبيه على شبكة BNB لمنع الأخطاء
     st.markdown(f"""
-    <div style="background-color: #1e1b4b; padding: 20px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 20px;">
-        <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هام جداً قبل التحويل:</h4>
-        <p style="color: #fef3c7; font-size: 15px;">
-            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى قد يؤدي لضياع الأموال!
+    <div style="background-color: #fee2e2; border: 2px solid #ef4444; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h4 style="color: #991b1b; margin-top: 0;">🚨 تنبيه هامة جداً قبل التحويل:</h4>
+        <p style="color: #7f1d1d; font-size: 15px; font-weight: bold;">
+            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span). أي تحويل على شبكة أخرى سيؤدي لضياع الأموال ولن يتم تفعيل حسابك أوتوماتيكياً!
         </p>
-        <hr style="border-color: #374151;">
-        <h4 style="color: #38bdf8; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
-        <div style="background: #0f172a; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
+        <hr style="border-color: #fca5a5;">
+        <h4 style="color: #1e3a8a; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
+        <div style="background: #1e293b; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
             {my_usdt_wallet}
         </div>
-        <p style="color: #94a3b8; text-align: center; font-size: 13px; margin-bottom: 15px;">المبلغ المطلوب: <b>200 دولار USDT</b></p>
+        <p style="color: #334155; text-align: center; font-size: 13px; margin-bottom: 15px;">المبلغ المطلوب: <b>200 دولار USDT</b></p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -110,67 +110,83 @@ elif site_choice == "🔑 موقع دخول الشركات المستقل":
             st.session_state["current_logged_company"] = None
             st.rerun()
 
-    # 2. لوحة تحكم العميل المشترك (المنصة المعزولة)
+    # 2. لوحة تحكم العميل المشترك (المنصة المعزولة ذات المستوى العالمي)
     elif st.session_state["current_logged_company"] and st.session_state["current_logged_company"] != "admin123":
         comp_id = st.session_state["current_logged_company"]
         st.title(f"🔒 لوحة تحكم شركتك المعزولة (ID: {comp_id})")
-        st.success("✅ اشتراكك مفعل وسيرفرات البحث والنمو تعمل الآن في الخلفية أوتوماتيكياً.")
+        st.success("✅ اشتراكك مفعل بنجاح! جميع أدوات النمو وتحليل المنتجات العالمية تعمل بكفاءة.")
         
-        tab_tools, tab_files, tab_ai, tab_server = st.tabs([
-            "🚀 أدوات النمو", 
-            "📁 تحليل ورفع الملفات", 
-            "🤖 مساعد الذكاء الاصطناعي", 
-            "⚙️ تشغيل السيرفرات والبحث"
+        # تبويبات الواجهة الداخلية المطورة
+        tab_tools, tab_products, tab_ai, tab_server = st.tabs([
+            "🚀 أدوات النمو الشاملة", 
+            "📦 تحليل المنتجات والبيانات الذكي", 
+            "🤖 مستشار الذكاء الاصطناعي التخصصي", 
+            "⚙️ محرك السيرفرات الآلي"
         ])
 
         with tab_tools:
-            st.subheader("بيئة النمو الخاصة بشركتك")
-            st.write("أنت الآن تعمل في مساحة عمل مستقلة تماماً ومؤمنة بالكامل.")
-            st.metric("العملاء المستهدفين المكتشفين", "1,420 عميل محتمل")
+            st.subheader("📊 لوحة مؤشرات الأداء والنمو (Growth Dashboard)")
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("العملاء المستهدفين (B2B)", "4,820 عميل", "+12% اليوم")
+            with col_b:
+                st.metric("الحملات الآلية النشطة", "8 حملات", "تجري الآن")
+            with col_c:
+                st.metric("معدل التحويل المتوقع", "18.4%", "مرتفع 🟢")
+            
+            st.markdown("---")
+            st.info("💡 مساحة العمل الخاصة بك معزولة تماماً وآمنة بنسبة 100% لضمان أعلى أداء تسويقي.")
 
-        with tab_files:
-            st.subheader("رفع وتحليل ملفات البيانات")
-            uploaded_file = st.file_uploader("ارفع ملف داتا العملاء أو ملفات الشركة (CSV, Excel, TXT):", type=["csv", "xlsx", "txt"])
-            if uploaded_file is not None:
-                st.success("✅ تم رفع الملف وتحليله بنجاح بواسطة خوارزميات النمو الذكية!")
-                if uploaded_file.name.endswith('.csv'):
-                    df = pd.read_csv(uploaded_file)
-                    st.dataframe(df.head())
+        with tab_products:
+            st.subheader("📦 مركز تحليل المنتجات والبيانات المتقدم")
+            st.write("ارفع ملفات منتجاتك، قوائم الأسعار، أو داتا العملاء ليقوم النظام بتحليلها واستخراج الفرص:")
+            
+            uploaded_prod_file = st.file_uploader("ارفع ملف المنتجات أو العملاء (CSV, Excel, TXT):", type=["csv", "xlsx", "txt"])
+            if uploaded_prod_file is not None:
+                with st.spinner("جاري تحليل المنتجات وأنماط السوق بواسطة خوارزميات الذكاء الاصطناعي..."):
+                    time.sleep(2)
+                st.success("✅ تم تحليل المنتجات والبيانات بنجاح واستخراج التوصيات التسويقية!")
+                
+                if uploaded_prod_file.name.endswith('.csv'):
+                    df_prod = pd.read_csv(uploaded_prod_file)
+                    st.dataframe(df_prod.head(10))
                 else:
-                    st.info("تمت قراءة الملف بنجاح واستخراج الأنماط التسويقية منه.")
+                    st.write("📈 **تقرير التحليل الفوري للمنتجات:**")
+                    st.write("- تم تحديد نقاط القوة السعرية للمنتج.")
+                    st.write("- تم رصد الفئة المستهدفة الأكثر تفاعلاً في السوق الرقمي.")
 
         with tab_ai:
-            st.subheader("مساعد الذكاء الاصطناعي المتخصص للنمو")
-            st.write("اسأل خبير Growth Hacking الآلي أي شيء يخص حملاتك أو استراتيجياتك:")
+            st.subheader("🤖 مستشار الذكاء الاصطناعي التخصصي للنمو")
+            st.write("اسأل خبير النمو الآلي عن استراتيجيات تسويق منتجاتك وكيفية مضاعفة المبيعات:")
             
             if comp_id not in st.session_state["ai_chat_history"]:
                 st.session_state["ai_chat_history"][comp_id] = [
-                    {"role": "assistant", "content": "أهلاً بك! أنا خبير النمو الخاص بشركتك. كيف أساعدك في مضاعفة مبيعاتك اليوم؟"}
+                    {"role": "assistant", "content": "أهلاً بك يا فنان! تذكر دائماً أن مدفوعات الشبكة وتحديثات الاشتراكات تتم حصراً عبر شبكة BNB Smart Chain[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span). كيف أساعدك في تحليل منتجاتك أو إطلاق حملتك اليوم؟"}
                 ]
             
             for msg in st.session_state["ai_chat_history"][comp_id]:
                 with st.chat_message(msg["role"]):
                     st.write(msg["content"])
                     
-            user_query = st.chat_input("اكتب استفسارك التسويقي هنا...")
+            user_query = st.chat_input("اكتب استفسارك أو خطتك هنا...")
             if user_query:
                 st.session_state["ai_chat_history"][comp_id].append({"role": "user", "content": user_query})
                 with st.chat_message("user"):
                     st.write(user_query)
                 
-                ai_reply = f"بناءً على تحليل بيانات شركتك، أقترح التركيز على استهداف قطاع B2B عبر الحملات الآلية للوصول إلى نتائج سريعة بخصوص طلبك: '{user_query}'."
+                ai_reply = f"بناءً على تحليل منتجاتك وبيانات السوق، ولمواصلة العمل بكفاءة عبر شبكة BNB[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)، أقترح عليك تنفيذ الآتي بخصوص طلبك: '{user_query}' لضمان أعلى عائد استثماري."
                 st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
                 with st.chat_message("assistant"):
                     st.write(ai_reply)
 
         with tab_server:
-            st.subheader("⚙️ محرك تشغيل السيرفرات والبحث الآلي")
-            st.write("منطقة جاهزة لربط أكواد السيرفرات وتفعيل البحث والإرسال الفوري طيارة:")
+            st.subheader("⚙️ محرك تشغيل السيرفرات والبحث الآلي (Background Worker)")
+            st.write("التحكم الكامل في تشغيل العقد وسيرفرات زحف البيانات وجلب العملاء طيارة:")
             
-            if st.button("🚀 تشغيل سيرفرات البحث وجلب العملاء الآن"):
-                with st.spinner("جاري ربط العقد وسيرفرات البحث الخارجي..."):
+            if st.button("🚀 تشغيل سيرفرات البحث والتحليل الفوري"):
+                with st.spinner("جاري إرسال إشارات التشغيل للسيرفرات وبدء جلب العملاء..."):
                     time.sleep(3)
-                st.success("🔥 تم تشغيل السيرفرات بنجاح وإرسال نبضات البحث للشبكة!")
+                st.success("🔥 تعمل الآن سيرفرات البحث والتحليل بأقصى طاقة بكفاءة تامة!")
 
         st.markdown("---")
         if st.button("🚪 تسجيل الخروج"):

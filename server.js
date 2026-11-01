@@ -6,8 +6,8 @@ const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 3000;
 
-// 1. تفعيل بوت تليجرام بشكل آمن لمنع تعارض الجلسات (Conflict Prevention)
-const token = process.env.TELEGRAM_BOT_TOKEN || '9266573110:AAFAu_U4pqonFIMJkszpF3GcsB3nKdLwUvg';
+// 1. تفعيل بوت تليجرام بالتوكن الجديد وبشكل آمن تماماً
+const token = process.env.TELEGRAM_BOT_TOKEN || '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
 const bot = new TelegramBot(token, { polling: false });
 
 // بدء استقبال الرسائل بأمان تام بدون أي تضارب
@@ -22,7 +22,7 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
     } else {
       bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
     }

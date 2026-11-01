@@ -101,13 +101,14 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
                 st.write(ai_reply)
 
     with tab_server:
-        st.subheader("⚙️ محرك تشغيل السيرفرات والبحث الآلي")
+        st.subheader("⚙️ محرك تشغيل السيرفرات والبحث الآلي (جاهز لأكوادك)")
         st.write("السكربت البرمجي المخصص لبدء البحث وإرسال الإشارات للسيرفرات:")
         
         if st.button("🚀 تشغيل سيرفرات البحث وجلب العملاء الآن"):
-            with st.spinner("جاري تهيئة العقد السيرفرية وبدء زحف البيانات (Scraping)..."):
+            with st.spinner("جاري ربط السيرفرات وتنفيذ الأكواد البرمجية للبحث..."):
+                # مكان الأكواد بتاعت السيرفرات بتاعتك لاحقاً
                 time.sleep(3)
-            st.success("🔥 تم تفعيل السيرفرات بنجاح وإرسال أول دفعة من نبضات البحث للشبكة!")
+            st.success("🔥 تم تفعيل السيرفرات وبدء جلب العملاء بنجاح!")
 
     st.markdown("---")
     if st.button("🚪 تسجيل الخروج"):
@@ -115,34 +116,35 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
         st.rerun()
 
 # ---------------------------------------------------------
-# الواجهة الرئيسية (بوابة الاشتراك والدفع المباشر)
+# الواجهة الرئيسية (بوابة الاشتراك والدفع المباشر - منفصلة عن دخول الشركات)
 # ---------------------------------------------------------
 else:
-    st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
-    st.write("نظام SaaS متكامل ومستقل للشركات مع عزل تام، ذكاء اصطناعي، وتحليل ملفات فوري.")
-    st.markdown("---")
+    # القائمة الجانبية أو الاختيار لفصل "دخول الشركات" في صفحة مستقلة
+    nav_option = st.sidebar.radio("🧭 التنقل في المنصة", ["💳 بوابة الاشتراك والدفع", "🔑 تسجيل دخول الشركات"])
 
-    tab_pay, tab_login = st.tabs(["💳 الاشتراك والدفع الفوري", "🔑 دخول الشركة"])
+    if nav_option == "💳 بوابة الاشتراك والدفع":
+        st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
+        st.write("نظام SaaS متكامل ومستقل للشركات مع عزل تام، ذكاء اصطناعي، وتحليل ملفات فوري[span_0](start_span)[span_0](end_span).")
+        st.markdown("---")
 
-    with tab_pay:
         st.subheader("خطوات الدفع والتفعيل الفوري")
         
         my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
         payment_uri = f"ethereum:{my_usdt_wallet}"
         
-        # صندوق الدفع مع زر الـ HTML المدمج والمباشر بالكامل
+        # صندوق الدفع مع زر الـ HTML التفاعلي السليم (بدون ظهور كود نصي)
         st.markdown(f"""
         <div style="background-color: #1e1b4b; padding: 20px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 20px;">
-            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هام جداً قبل التحويل:</h4>
+            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هام جداً قبل التحويل[span_1](start_span)[span_1](end_span):</h4>
             <p style="color: #fef3c7; font-size: 15px;">
                 يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى قد يؤدي لضياع الأموال!
             </p>
             <hr style="border-color: #374151;">
-            <h4 style="color: #38bdf8; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
+            <h4 style="color: #38bdf8; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح[span_2](start_span)[span_2](end_span):</h4>
             <div style="background: #0f172a; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
                 {my_usdt_wallet}
             </div>
-            <p style="color: #94a3b8; text-align: center; font-size: 13px; margin-bottom: 15px;">المبلغ المطلوب: <b>200 دولار USDT</b></p>
+            <p style="color: #94a3b8; text-align: center; font-size: 13px; margin-bottom: 15px;">المبلغ المطلوب: <b>200 دولار USDT</b>[span_3](start_span)[span_3](end_span)</p>
             
             <div style="text-align: center;">
                 <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block;">🔗 اضغط هنا لفتح محفظتك والدفع السريع</a>
@@ -150,7 +152,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB:")
+        tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB[span_4](start_span)[span_4](end_span):")
         
         if st.button("✨ تفعيل المنصة الخاصة بي فوراً"):
             if len(tx_hash.strip()) >= 5:
@@ -170,8 +172,11 @@ else:
             else:
                 st.error("❌ برجاء إدخال رقم المعاملة أو كود التحويل الصحيح.")
 
-    with tab_login:
-        st.subheader("تسجيل الدخول لمنصتك المستقلة")
+    else:
+        st.title("🔑 تسجيل الدخول للشركات المسجلة")
+        st.write("أدخل كود شركتك السري للوصول إلى لوحة التحكم المستقلة الخاصة بك.")
+        st.markdown("---")
+        
         entered_secret = st.text_input("أدخل كود شركتك السري:", type="password")
         
         if st.button("🔐 دخول المنصة"):

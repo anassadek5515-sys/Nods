@@ -28,7 +28,7 @@ bot.on('message', (msg) => {
   }
 });
 
-// 2. إعدادات الإرسال الفعلي للإيميلات (SMTP - يبعت إيميلات بجد للشركات)
+// 2. إعدادات الإرسال الفعلي للإيميلات (SMTP)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
@@ -39,74 +39,50 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 3. محرك البحث الحقيقي (Google Custom Search API) لإحضار مواقع الشركات بجد
+// 3. طابور الشركات (مُجهز بملء البيانات أوتوماتيكياً حسب اسم الشركة وموقعها)
 const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
-let liveTargetsQueue = [];
+let liveTargetsQueue = [
+  { name: "TechNova Solutions", email: process.env.TEST_TARGET_EMAIL || "test-target@example.com", website: "https://technova-example.com" },
+  { name: "Global Growth Partners", email: process.env.TEST_TARGET_EMAIL || "test-target@example.com", website: "https://globalgrowth-example.com" }
+];
 
-function fetchRealCompaniesFromGoogle(query = 'digital marketing agencies contact email') {
-  const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
-  const cx = process.env.GOOGLE_SEARCH_CX;
-
-  if (!apiKey || !cx) {
-    console.log('⚠️ مفاتيح Google Search API غير متوفرة في Environment Variables، يتم استخدام الوضع الاحتياطي الذكي...');
-    // شركات حقيقية عينة للاختبار الفوري
-    liveTargetsQueue.push({
-      name: "Verified Lead Corp",
-      email: process.env.TEST_TARGET_EMAIL || "test-target@example.com",
-      website: "https://example.com"
-    });
-    return;
-  }
-
-  const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}`;
-  
-  https.get(searchUrl, (res) => {
-    let data = '';
-    res.on('data', (chunk) => { data += chunk; });
-    res.on('end', () => {
-      try {
-        const result = JSON.parse(data);
-        if (result.items) {
-          result.items.forEach(item => {
-            liveTargetsQueue.push({
-              name: item.title,
-              email: process.env.TEST_TARGET_EMAIL || "contact@targetcompany.com", // استخراج الإيميل أو استخدام الدومين
-              website: item.link
-            });
-          });
-          console.log(`✅ تم جلب ${result.items.length} موقع شركة حقيقي من نتائج بحث جوجل بنجاح!`);
-        }
-      } catch (e) {
-        console.error('❌ خطأ في تحليل بيانات جوجل:', e.message);
-      }
-    });
-  }).on('error', (err) => {
-    console.error('❌ خطأ في الاتصال بمحرك بحث جوجل:', err.message);
-  });
-}
-
-// 4. تنفيذ الحملة والإرسال الفعلي للرسائل بجد
+// 4. محرك الحملات والنموذج التسويقي المعبأ تلقائياً (High-Converting Template)
 async function executeRealOutreach(company) {
-  console.log(`🚀 [Outreach - Live] يتم الآن إرسال إيميل فعلي إلى الشركة: ${company.name} (${company.email})`);
+  console.log(`🚀 [Outreach - Live] يتم الآن إرسال الإيميل المخصص إلى الشركة: ${company.name}`);
+
+  // نموذج الإيميل التسويقي الفتاك (بيملأ اسم الشركة والموقع أوتوماتيك في كل رسالة)
+  const emailSubject = `Quick question about ${company.name}'s customer acquisition`;
   
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+      <p>Hi Team at <strong>${company.name}</strong>,</p>
+      
+      <p>I was browsing through <strong>${company.website}</strong> and noticed your strong positioning, but I saw an opportunity to scale your inbound B2B lead generation on complete autopilot.</p>
+      
+      <p>We built an <strong>Autonomous 24/7 Growth-Hacking Engine</strong> that runs live web prospecting, extracts verified leads, and dispatches hyper-personalized outreach without human intervention.</p>
+      
+      <p>Would you be open to seeing a quick 2-minute demo of how this can inject a steady stream of clients into ${company.name}?</p>
+      
+      <p>Best regards,<br>
+      <strong>AI Growth Automation Team</strong><br>
+      <a href="https://t.me/storyanalyzer2026_bot" target="_blank">Activate Your Engine on Telegram</a></p>
+    </div>
+  `;
+
   try {
     const info = await transporter.sendMail({
       from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
       to: company.email,
-      subject: 'Boost Your B2B Sales & Growth with AI Automation',
-      text: `Hello, we noticed your amazing work at ${company.website}. We provide a 24/7 autonomous growth-hacking engine to scale your business. Check us out!`,
-      html: `<b>Hello!</b><br>We noticed your amazing work at <a href="${company.website}">${company.name}</a>.<br>We provide a 24/7 autonomous growth-hacking engine to scale your business.`
+      subject: emailSubject,
+      html: emailHtml
     });
-    console.log(`✅ تم إرسال الرسالة بنجاح للشركة ${company.name}! معرف الرسالة: ${info.messageId}`);
+    console.log(`✅ تم إرسال الرسالة المخصصة بنجاح للشركة ${company.name}! Message ID: ${info.messageId}`);
   } catch (error) {
     console.error(`❌ فشل إرسال الرسالة للشركة ${company.name}:`, error.message);
   }
 }
 
-// تشغيل البحث الأول فوراً
-fetchRealCompaniesFromGoogle();
-
-// 5. خادم الـ HTTP لإدارة المنظومة
+// 5. خادم الـ HTTP
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -126,17 +102,15 @@ const server = http.createServer((req, res) => {
       status: 'active live engine 24/7',
       workerId: WORKER_ID,
       liveQueueSize: liveTargetsQueue.length,
-      message: 'Real Google Search & Real Email Dispatcher is Active'
+      message: 'High-Converting Dynamic Outreach Engine is Active'
     }));
     return;
   }
 
   if (parsedUrl.pathname === '/api/execute-campaign' && req.method === 'GET') {
     if (liveTargetsQueue.length === 0) {
-      // جلب شركات جديدة لو الطابور فاضي
-      fetchRealCompaniesFromGoogle();
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ success: false, message: 'Queue was empty. Triggered new Google Search.' }));
+      res.end(JSON.stringify({ success: false, message: 'Queue is empty.' }));
       return;
     }
 
@@ -146,7 +120,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       success: true,
-      message: `Live campaign executed on ${batch.length} companies with real emails sent!`,
+      message: `Dynamic personalized campaign executed on ${batch.length} companies!`,
       processed: batch
     }));
     return;
@@ -157,5 +131,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🔥 Real Google Search & Real Email Outreach Server running on port ${PORT}`);
+  console.log(`🔥 Dynamic Outreach Server running on port ${PORT}`);
 });

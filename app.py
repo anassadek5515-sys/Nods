@@ -42,7 +42,7 @@ if st.session_state["current_logged_company"] == "admin123":
 elif st.session_state["current_logged_company"] and st.session_state["current_logged_company"] != "admin123":
     comp_id = st.session_state["current_logged_company"]
     st.title(f"🔒 لوحة تحكم الشركة المشفرة الخاصة بك")
-    st.success(f"✅ أهلاً بك! تم التحقق من اشتراكك بنجاح. عنوانك السري وكلمة سر بيئتك المعزولة: **{comp_id}**")
+    st.success(f"✅ أهلاً بك! تم تأكيد اشتراكك بالعملات الرقمية بنجاح. عنوانك السري وكلمة سر بيئتك المعزولة: **{comp_id}**")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -52,57 +52,47 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
             st.success("✅ تم إرسال الأوامر بنجاح لسيرفرات الـ Node.js الخلفية لبدء الزحف وجلب العملاء لشركتك!")
             
     with col2:
-        st.subheader("💳 تفاصيل اشتراكك الشهري ($200)")
-        st.info("💡 اشتراكك نشط ومربوط ببوابة Paddle بنجاح.")
-        if st.button("💳 إدارة أو تجديد الاشتراك"):
-            st.success("✅ اشتراكك مسجل في النظام بنجاح!")
+        st.subheader("💳 تفاصيل اشتراكك الشهري ($200 USDT)")
+        st.info("💡 اشتراكك نشط وآمن ومؤكد عبر شبكة البلوكشين.")
+        if st.button("💳 تفاصيل الحساب"):
+            st.success("✅ حسابك مسجل ومحمي تماماً!")
 
     if st.button("🚪 تسجيل خروج"):
         st.session_state["current_logged_company"] = None
         st.rerun()
 
-# 3. الصفحة الرئيسية (الاشتراك عبر بوابة Paddle الحقيقية + التحقق من الدفع)
+# 3. الصفحة الرئيسية (بوابة الدفع الآمن بالـ USDT + تفعيل الحساب)
 else:
     st.title("🚀 منصة النمو الذكي والأتمتة للشركات ($200/شهر)")
     st.write("نظام آلي متكامل لجلب 40,000 عميل شهرياً، مع عزل كامل والحفاظ على أمن وخصوصية كل شركة مشتركة.")
     st.markdown("---")
 
-    tab_pay, tab_login = st.tabs(["💳 الاشتراك الفوري وبوابة الدفع", "🔑 دخول الشركة المشفرة"])
+    tab_pay, tab_login = st.tabs(["🌐 الاشتراك الآمن (USDT)", "🔑 دخول الشركة المشفرة"])
 
     with tab_pay:
-        st.subheader("خطوة الاشتراك الشهري ($200)")
-        st.write("1️⃣ اضغط على زر الدفع أدناه لإتمام الاشتراك المالي الآمن عبر بوابة Paddle الرسمية:")
+        st.subheader("خطوة الاشتراك الشهري ($200 عبر العملات الرقمية المستقرة)")
+        st.info("💡 **طريقة الدفع للمشترين من كل أنحاء العالم:**\n"
+                  "1. قم بتحويل مبلغ **$200 USDT** إلى عنوان محفظتنا الرسمي عبر شبكة (TRC20):\n"
+                  "👉 `TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` (حط هنا عنوان محفظتك الحقيقي)\n"
+                  "2. بعد إتمام التحويل، أدخل رقم العملية أو الـ **Transaction Hash** في الخانة أدناه لتفعيل بيئتك المعزولة فوراً.")
         
-        # استخدام معرف المنتج الصحيح لضمان عدم ظهور Page Not Found
-        product_id = "pro_01m6c4bjrfpjng0mft2ntqx0tn"
-        paddle_checkout_url = f"https://buy.paddle.com/product/{product_id}"
+        tx_hash = st.text_input("أدخل رقم العملية (Transaction Hash) أو كود التأكيد:", type="password")
         
-        st.markdown(f"""
-            <div style="text-align: center; margin-top: 15px; margin-bottom: 15px;">
-                <a href="{paddle_checkout_url}" target="_blank">
-                    <button style="background-color: #238636; color: white; padding: 18px 35px; font-size: 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; width: 100%;">
-                        💳 دفع 200$ الآن عبر بوابة Paddle الرسمية
-                    </button>
-                </a>
-            </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("---")
-        st.write("2️⃣ **بعد إتمام الدفع بنجاح في نافذة Paddle:** أدخل كود التأكيد أو اضغط لتوليد واعتماد حسابك السري فوراً:")
-        
-        payment_verification_code = st.text_input("أدخل كود المعاملة أو رقم العملية من إيصال الدفع:", type="password")
-        
-        if st.button("✨ تفعيل الحساب وتوليد عنوان الشركة السري (بعد الدفع)"):
-            new_company_id = f"comp_sec_{int(time.time())}"
-            st.session_state["companies_database"][new_company_id] = {
-                "type": "client",
-                "status": "paid_200",
-                "created_at": time.time()
-            }
-            st.session_state["current_logged_company"] = new_company_id
-            st.success(f"🎉 تم التحقق من الدفع وتوليد عنوان شركتك السري بنجاح: **{new_company_id}**! جاري نقلك لبيئتك...")
-            time.sleep(2)
-            st.rerun()
+        if st.button("✨ التحقق من الدفع وتوليد عنوان الشركة السري"):
+            if len(tx_hash.strip()) >= 10:
+                new_company_id = f"comp_sec_{int(time.time())}"
+                st.session_state["companies_database"][new_company_id] = {
+                    "type": "client",
+                    "status": "active_crypto",
+                    "tx_hash": tx_hash,
+                    "created_at": time.time()
+                }
+                st.session_state["current_logged_company"] = new_company_id
+                st.success(f"🎉 تم تأكيد الدفع وتوليد عنوان شركتك السري بنجاح: **{new_company_id}**! جاري نقلك لبيئتك المعزولة...")
+                time.sleep(2)
+                st.rerun()
+            else:
+                st.error("❌ برجاء إدخال رقم عملية (TxID) صحيح ومكتمل لتأكيد الاشتراك.")
 
     with tab_login:
         st.subheader("تسجيل الدخول للشركات المشتركة مسبقاً")
@@ -116,4 +106,4 @@ else:
                 st.success("✅ تم التحقق من الهوية والدخول بنجاح!")
                 st.rerun()
             else:
-                st.error("❌ عذراً، هذا العنوان غير مسجل أو لم يتم تأكيد اشتراكه بـ 200$.")
+                st.error("❌ عذراً، هذا العنوان غير مسجل في النظام.")

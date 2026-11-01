@@ -9,7 +9,6 @@ st.set_page_config(
 
 # تهيئة قاعدة البيانات المحلية المؤقتة في الذاكرة لتخزين حسابات الشركات وعزلها
 if "companies_database" not in st.session_state:
-    # بنحط حساب الأدمن الافتراضي وحساب تجريبي للتوضيح
     st.session_state["companies_database"] = {
         "admin123": {"type": "admin", "name": "الرئيس (الأدمن)"},
         "company_demo_01": {"type": "client", "name": "شركة تجريبية", "status": "نشط"}
@@ -43,7 +42,7 @@ if st.session_state["current_logged_company"] == "admin123":
 elif st.session_state["current_logged_company"] and st.session_state["current_logged_company"] != "admin123":
     comp_id = st.session_state["current_logged_company"]
     st.title(f"🔒 لوحة تحكم الشركة المشفرة الخاصة بك")
-    st.info(عرفت هويتك بنجاح. هذا هو عنوانك السري والخاص بشركتك وحدك: **{comp_id}**")
+    st.info(f"عرفت هويتك بنجاح. هذا هو عنوانك السري والخاص بشركتك وحدك: **{comp_id}**")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -92,7 +91,6 @@ else:
         st.info("💡 **بعد إتمام الدفع بنجاح:** اضغط على الزر أدناه لتوليد عنوانك السري وكلمة السر الخاصة بشركتك فوراً ودخول بيئتك الخاصة:")
         
         if st.button("✨ توليد عنوان شركتي ودخول النظام (بعد الدفع)"):
-            # توليد عنوان وكلمة سر فريدة ومبتكرة للشركة الجديدة
             new_company_id = f"comp_{int(time.time())}"
             st.session_state["companies_database"][new_company_id] = {
                 "type": "client",

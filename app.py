@@ -130,10 +130,10 @@ else:
         my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
         payment_uri = f"ethereum:{my_usdt_wallet}"
         
-        # صندوق الدفع مع زر الـ HTML المدمج والمباشر
+        # صندوق الدفع مع زر الـ HTML المدمج والمباشر بالكامل
         st.markdown(f"""
         <div style="background-color: #1e1b4b; padding: 20px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 20px;">
-            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هامة جداً قبل التحويل:</h4>
+            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هام جداً قبل التحويل:</h4>
             <p style="color: #fef3c7; font-size: 15px;">
                 يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى قد يؤدي لضياع الأموال!
             </p>

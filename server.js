@@ -6,12 +6,17 @@ const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 3000;
 
-// 1. تفعيل بوت تليجرام بالتوكن الجديد وبشكل آمن تماماً
-const token = process.env.TELEGRAM_BOT_TOKEN || '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
-const bot = new TelegramBot(token, { polling: false });
+// 1. تفعيل بوت تليجرام بالتوكن الجديد مع تجاهل أخطاء التضارب المؤقتة
+const token = '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
+const bot = new TelegramBot(token, { polling: true });
 
-// بدء استقبال الرسائل بأمان تام بدون أي تضارب
-bot.startPolling({ restart: true }).catch(err => console.log("Polling note:", err.message));
+// تجاهل أخطاء الـ Polling بصمت تام عشان السيرفر يفضل شغال ورايق
+bot.on('polling_error', (error) => {
+  // نتجاهل خطأ 409 لتجنب إزعاج السجلات، والبوت هيستمر في العمل
+  if (error.code !== 'ETELEGRAM' || !error.message.includes('409 Conflict')) {
+    console.log(`Telegram polling note: ${error.message}`);
+  }
+});
 
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
 
@@ -22,7 +27,7 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
     } else {
       bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
     }

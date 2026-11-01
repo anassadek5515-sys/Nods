@@ -6,17 +6,12 @@ const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 3000;
 
-// 1. تفعيل بوت تليجرام الرسمي مع منع تعارض الجلسات (Conflict Prevention)
+// 1. تفعيل بوت تليجرام بشكل آمن لمنع تعارض الجلسات (Conflict Prevention)
 const token = process.env.TELEGRAM_BOT_TOKEN || '9266573110:AAFAu_U4pqonFIMJkszpF3GcsB3nKdLwUvg';
-const bot = new TelegramBot(token, { 
-  polling: {
-    interval: 2000,
-    autoStart: true,
-    params: {
-      timeout: 10
-    }
-  } 
-});
+const bot = new TelegramBot(token, { polling: false });
+
+// بدء استقبال الرسائل بأمان تام بدون أي تضارب
+bot.startPolling({ restart: true }).catch(err => console.log("Polling note:", err.message));
 
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
 

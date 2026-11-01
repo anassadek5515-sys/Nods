@@ -5,7 +5,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
         status: 'online',
-        message: 'Node is active and running successfully on Vercel!',
+        message: 'Node is active and running successfully on Glitch!',
         timestamp: new Date()
     }));
 });

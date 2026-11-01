@@ -53,7 +53,6 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
     st.title(f"🔒 لوحة تحكم شركتك المعزولة (ID: {comp_id})")
     st.success("✅ اشتراكك مفعل وسيرفرات البحث والنمو تعمل الآن في الخلفية.")
     
-    # تبويبات لوحة العميل المتكاملة
     tab_tools, tab_files, tab_ai, tab_server = st.tabs([
         "🚀 أدوات النمو", 
         "📁 تحليل ورفع الملفات", 
@@ -96,7 +95,6 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
             with st.chat_message("user"):
                 st.write(user_query)
             
-            # رد الذكاء الاصطناعي التخصصي
             ai_reply = f"بناءً على تحليل بيانات شركتك، أقترح التركيز على استهداف قطاع B2B عبر الحملات الآلية للوصول إلى نتائج سريعة بخصوص طلبك: '{user_query}'."
             st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
             with st.chat_message("assistant"):
@@ -117,7 +115,7 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
         st.rerun()
 
 # ---------------------------------------------------------
-# الواجهة الرئيسية (بوابة الاشتراك والدفع المباشر بالـ Crypto)
+# الواجهة الرئيسية (بوابة الاشتراك والدفع الآمن حصراً عبر BNB Smart Chain)
 # ---------------------------------------------------------
 else:
     st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
@@ -130,23 +128,24 @@ else:
         st.subheader("خطوات الدفع والتفعيل الفوري")
         
         my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
-        # رابط دفع مباشر للـ USDT يفتح تطبيقات المحافظ أوتوماتيكياً
-        payment_uri = f"ethereum:{my_usdt_wallet}"
         
+        # تحذير قاطع وتأكيد على شبكة BNB لمنع أي تحويل خاطئ
         st.markdown(f"""
-        <div style="background-color: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #1e293b; margin-bottom: 20px;">
-            <h4 style="color: #38bdf8; margin-top: 0;">🌐 بوابة الدفع الآمن (USDT - BEP20):</h4>
-            <p style="color: #e2e8f0;">1️⃣ قم بتحويل مبلغ <b>$200 (USDT)</b> على شبكة <b>BNB Smart Chain</b> إلى العنوان التالي:</p>
-            <div style="background: #1e293b; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
+        <div style="background-color: #1e1b4b; padding: 20px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 20px;">
+            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هامة جداً قبل التحويل:</h4>
+            <p style="color: #fef3c7; font-size: 15px;">
+                يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span). أي تحويل على شبكة أخرى (مثل Ethereum أو TRC20) قد يؤدي ضياع الأموال ولن يتم تفعيل حسابك تلقائياً!
+            </p>
+            <hr style="border-color: #374151;">
+            <h4 style="color: #38bdf8; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
                 {my_usdt_wallet}
             </div>
-            <div style="text-align: center; margin-top: 15px;">
-                <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">🔗 اضغط هنا للدفع السريع عبر محفظتك</a>
-            </div>
+            <p style="color: #94a3b8; text-align: center; font-size: 13px; margin-bottom: 0;">المبلغ المطلوب: <b>200 دولار USDT</b></p>
         </div>
         """, unsafe_allow_html=True)
         
-        tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع:")
+        tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB:")
         
         if st.button("✨ تفعيل المنصة الخاصة بي فوراً"):
             if len(tx_hash.strip()) >= 5:
@@ -156,12 +155,13 @@ else:
                     "status": "active",
                     "tx_hash": tx_hash,
                     "amount": 200,
+                    "network": "BNB Smart Chain (BEP20)",
                     "created_at": time.time()
                 }
                 st.session_state["current_logged_company"] = new_company_id
                 st.success(f"🎉 تم إنشاء منصتك المستقلة بنجاح! كود الدخول السري الخاص بك: **{new_company_id}** (احتفظ به جيداً)")
                 time.sleep(2)
-                st.rerun()
+                st.rerurn()
             else:
                 st.error("❌ برجاء إدخال رقم المعاملة أو كود التحويل الصحيح.")
 
@@ -172,6 +172,6 @@ else:
         if st.button("🔐 دخول المنصة"):
             if entered_secret in st.session_state["companies_database"]:
                 st.session_state["current_logged_company"] = entered_secret
-                st.rerun()
+                st.rerurn()
             else:
                 st.error("❌ عذراً، هذا الكود غير مسجل أو خطأ في البيانات.")

@@ -1,5 +1,5 @@
 {
-  "name": "nods",
+  "name": "story-analyzer-saas",
   "version": "1.0.0",
   "private": true,
   "main": "server.js",
@@ -7,7 +7,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "nedb": "^1.8.0",
     "node-telegram-bot-api": "^0.61.0"
   },
   "engines": {

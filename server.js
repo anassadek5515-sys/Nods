@@ -10,19 +10,16 @@ let globalTargetsQueue = [];
 async function runFastSearchEngine() {
   console.log('🔍 جارِ تشغيل اسكربت البحث السريع لجلب مواقع الشركات...');
   
-  // هنا محاكاة لاسكربت البحث اللي بيجيب الـ 40 ألف موقع في ثواني
-  // (تقدر تحط هنا منطق البحث الفعلي أو الـ Scraper الخاص بك)
   const discoveredTargets = [];
   for (let i = 1; i <= 100; i++) {
-    discoveredTargets.(`https://example-company-${Date.now()}-${i}.com/contact`);
+    discoveredTargets.push(`https://example-company-${Date.now()}-${i}.com/contact`);
   }
 
-  // إضافة الروابط الجديدة للطابور العام
   globalTargetsQueue = globalTargetsQueue.concat(discoveredTargets);
   console.log(`✅ تم جلب وإضافة ${discoveredTargets.length} موقع جديد. الإجمالي في الطابور: ${globalTargetsQueue.length}`);
 }
 
-// تشغيل البحث تلقائياً عند بدء تشغيل السيرفر (أو يمكن جدولته)
+// تشغيل البحث تلقائياً عند بدء التشغيل
 runFastSearchEngine();
 
 const server = http.createServer((req, res) => {
@@ -49,7 +46,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // زر تشغيل البحث يدوياً لو احتجت تجدد الداتا في أي وقت
+  // نقطة تشغيل البحث يدوياً
   if (parsedUrl.pathname === '/api/run-search' && req.method === 'POST') {
     runFastSearchEngine();
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -57,11 +54,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // نقطة سحب الروابط للـ 6 سيرفرات (Workers)
+  // نقطة سحب الروابط للـ Workers
   if (parsedUrl.pathname === '/api/get-targets' && req.method === 'GET') {
     const workerId = parsedUrl.query.workerId || 1;
     
-    // سحب دفعة لكل سيرفر (مثلاً 100 رابط في كل طلب)
     const batchSize = 100;
     const workerBatch = globalTargetsQueue.splice(0, batchSize);
 

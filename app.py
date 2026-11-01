@@ -9,9 +9,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# اكتشاف لغة متصفح أو جهاز المستخدم (افتراضي عربي أو إنجليزي)
-user_lang = "ar" # يمكن توسيعها لاحقاً لقراءة إعدادات المتصفح بدقة
-
 # 2. قواعد البيانات والذاكرة المحلية
 if "companies_database" not in st.session_state:
     st.session_state["companies_database"] = {
@@ -118,66 +115,44 @@ elif st.session_state["current_logged_company"] and st.session_state["current_lo
         st.rerun()
 
 # ---------------------------------------------------------
-# الواجهة الرئيسية (بوابة الاشتراك والدفع المباشر المتوافقة مع لغة الجهاز)
+# الواجهة الرئيسية (بوابة الاشتراك والدفع المباشر)
 # ---------------------------------------------------------
 else:
-    # تخصيص النصوص بناءً على لغة الجهاز المكتشفة
-    if user_lang == "ar":
-        main_title = "🚀 منصة النمو الذكي للشركات ($200/شهر)"
-        main_desc = "نظام SaaS متكامل ومستقل للشركات مع عزل تام، ذكاء اصطناعي، وتحليل ملفات فوري ومتوافق مع لغة جهازك."
-        tab1_name = "💳 الاشتراك والدفع الفوري"
-        tab2_name = "🔑 دخول الشركة"
-        pay_header = "خطوات الدفع والتفعيل الفوري"
-        warning_title = "⚠️ تنبيه هامة جداً قبل التحويل:"
-        warning_desc = "يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى قد يؤدي لضياع الأموال!"
-        wallet_label = "🌐 عنوان محفظتك المعتمد لاستلاستلام الأرباح:"
-        btn_pay_text = "🔗 اضغط هنا لفتح محفظتك والدفع السريع"
-        input_tx = "أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB:"
-        btn_activate = "✨ تفعيل المنصة الخاصة بي فوراً"
-        login_header = "تسجيل الدخول لمنصتك المستقلة"
-        input_secret = "أدخل كود شركتك السري:"
-        btn_login = "🔐 دخول المنصة"
-    else:
-        main_title = "🚀 AI Growth-Hacking Enterprise Platform ($200/mo)"
-        main_desc = "An integrated autonomous SaaS ecosystem for B2B growth with isolated workspaces and AI."
-        tab1_name = "💳 Instant Subscription & Payment"
-        tab2_name = "🔑 Company Login"
-        # يمكن إضافة النصوص الإنجليزية هنا بسهولة
-
-    st.title(main_title)
-    st.write(main_desc)
+    st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
+    st.write("نظام SaaS متكامل ومستقل للشركات مع عزل تام، ذكاء اصطناعي، وتحليل ملفات فوري.")
     st.markdown("---")
 
-    tab_pay, tab_login = st.tabs([tab1_name, tab2_name])
+    tab_pay, tab_login = st.tabs(["💳 الاشتراك والدفع الفوري", "🔑 دخول الشركة"])
 
     with tab_pay:
-        st.subheader(pay_header)
+        st.subheader("خطوات الدفع والتفعيل الفوري")
         
         my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
         payment_uri = f"ethereum:{my_usdt_wallet}"
         
+        # صندوق الدفع مع زر الـ HTML المدمج والمباشر
         st.markdown(f"""
         <div style="background-color: #1e1b4b; padding: 20px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 20px;">
-            <h4 style="color: #fbbf24; margin-top: 0;">{warning_title}</h4>
+            <h4 style="color: #fbbf24; margin-top: 0;">⚠️ تنبيه هامة جداً قبل التحويل:</h4>
             <p style="color: #fef3c7; font-size: 15px;">
-                {warning_desc}
+                يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى قد يؤدي لضياع الأموال!
             </p>
             <hr style="border-color: #374151;">
-            <h4 style="color: #38bdf8; margin-top: 10px;">{wallet_label}</h4>
+            <h4 style="color: #38bdf8; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
             <div style="background: #0f172a; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
                 {my_usdt_wallet}
             </div>
             <p style="color: #94a3b8; text-align: center; font-size: 13px; margin-bottom: 15px;">المبلغ المطلوب: <b>200 دولار USDT</b></p>
             
             <div style="text-align: center;">
-                <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block;">{btn_pay_text}</a>
+                <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block;">🔗 اضغط هنا لفتح محفظتك والدفع السريع</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        tx_hash = st.text_input(input_tx)
+        tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB:")
         
-        if st.button(btn_activate):
+        if st.button("✨ تفعيل المنصة الخاصة بي فوراً"):
             if len(tx_hash.strip()) >= 5:
                 new_company_id = f"comp_sec_{int(time.time())}"
                 st.session_state["companies_database"][new_company_id] = {
@@ -196,10 +171,10 @@ else:
                 st.error("❌ برجاء إدخال رقم المعاملة أو كود التحويل الصحيح.")
 
     with tab_login:
-        st.subheader(login_header)
-        entered_secret = st.text_input(input_secret, type="password")
+        st.subheader("تسجيل الدخول لمنصتك المستقلة")
+        entered_secret = st.text_input("أدخل كود شركتك السري:", type="password")
         
-        if st.button(btn_login):
+        if st.button("🔐 دخول المنصة"):
             if entered_secret in st.session_state["companies_database"]:
                 st.session_state["current_logged_company"] = entered_secret
                 st.rerun()

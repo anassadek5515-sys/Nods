@@ -22,20 +22,20 @@ if "ai_chat_history" not in st.session_state:
     st.session_state["ai_chat_history"] = {}
 
 # ---------------------------------------------------------
-# نظام التنقل بين الموقعين (فصل تام بين موقع الدفع وموقع دخول الشركات)
+# نظام التنقل التلقائي بين الموقعين (فصل تام)
 # ---------------------------------------------------------
-st.sidebar.title("🌐 بوابة المنصة الرئيسية")
+st.sidebar.title("🌐 بوابة المنصة")
 site_choice = st.sidebar.radio(
-    "اختر الموقع الانتقالي:", 
+    "اختر القسم:", 
     ["💳 موقع الاشتراك والدفع الفوري", "🔑 موقع دخول الشركات المستقل"]
 )
 
 # =========================================================
-# الموقع الأول: موقع الدفع والاشتراك فقط
+# الموقع الأول: موقع الدفع والاشتراك الآلي
 # =========================================================
 if site_choice == "💳 موقع الاشتراك والدفع الفوري":
     st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
-    st.write("بوابة الدفع والاشتراك الآمن - نظام SaaS متكامل مع عزل تام وتحليل فوري.")
+    st.write("بوابة الدفع والاشتراك الآلي - نظام SaaS متكامل مع عزل تام وتفعيل فوري.")
     st.markdown("---")
 
     st.subheader("خطوات الدفع والتفعيل الفوري")
@@ -59,7 +59,7 @@ if site_choice == "💳 موقع الاشتراك والدفع الفوري":
     </div>
     """, unsafe_allow_html=True)
     
-    # زر الدفع التفاعلي المباشر (شغال ومضبوط 100%)
+    # زر الدفع التفاعلي المباشر
     st.markdown(f"""
     <div style="text-align: center; margin-bottom: 25px;">
         <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">🔗 اضغط هنا لفتح محفظتك والدفع السريع</a>
@@ -68,7 +68,7 @@ if site_choice == "💳 موقع الاشتراك والدفع الفوري":
     
     tx_hash = st.text_input("أدخل رقم المعاملة أو كود التحويل (TXID) بعد إتمام الدفع على شبكة BNB:")
     
-    if st.button("✨ تفعيل المنصة الخاصة بي فوراً"):
+    if st.button("✨ تفعيل المنصة الخاصة بي أوتوماتيكياً"):
         if len(tx_hash.strip()) >= 5:
             new_company_id = f"comp_sec_{int(time.time())}"
             st.session_state["companies_database"][new_company_id] = {
@@ -79,7 +79,7 @@ if site_choice == "💳 موقع الاشتراك والدفع الفوري":
                 "network": "BNB Smart Chain (BEP20)",
                 "created_at": time.time()
             }
-            st.success(f"🎉 تم إنشاء منصتك بنجاح! كود الدخول السري الخاص بك: **{new_company_id}** (انسخه وادخل بيه في قسم تسجيل الدخول من القائمة الجانبية)")
+            st.success(f"🎉 تم تفعيل منصتك أوتوماتيكياً بنجاح! كود الدخول السري الخاص بك: **{new_company_id}** (انسخه وادخل بيه في قسم تسجيل الدخول من القائمة الجانبية)")
         else:
             st.error("❌ برجاء إدخال رقم المعاملة أو كود التحويل الصحيح.")
 
@@ -114,7 +114,7 @@ elif site_choice == "🔑 موقع دخول الشركات المستقل":
     elif st.session_state["current_logged_company"] and st.session_state["current_logged_company"] != "admin123":
         comp_id = st.session_state["current_logged_company"]
         st.title(f"🔒 لوحة تحكم شركتك المعزولة (ID: {comp_id})")
-        st.success("✅ اشتراكك مفعل وسيرفرات البحث والنمو تعمل الآن في الخلفية.")
+        st.success("✅ اشتراكك مفعل وسيرفرات البحث والنمو تعمل الآن في الخلفية أوتوماتيكياً.")
         
         tab_tools, tab_files, tab_ai, tab_server = st.tabs([
             "🚀 أدوات النمو", 
@@ -165,7 +165,7 @@ elif site_choice == "🔑 موقع دخول الشركات المستقل":
 
         with tab_server:
             st.subheader("⚙️ محرك تشغيل السيرفرات والبحث الآلي")
-            st.write("منطقة جاهزة لربط أكواد السيرفرات وتفعيل البحث والإرسال الفوري:")
+            st.write("منطقة جاهزة لربط أكواد السيرفرات وتفعيل البحث والإرسال الفوري طيارة:")
             
             if st.button("🚀 تشغيل سيرفرات البحث وجلب العملاء الآن"):
                 with st.spinner("جاري ربط العقد وسيرفرات البحث الخارجي..."):

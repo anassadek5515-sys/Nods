@@ -6,9 +6,17 @@ const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 3000;
 
-// 1. تفعيل بوت تليجرام الرسمي
+// 1. تفعيل بوت تليجرام الرسمي مع منع تعارض الجلسات (Conflict Prevention)
 const token = process.env.TELEGRAM_BOT_TOKEN || '9266573110:AAFAu_U4pqonFIMJkszpF3GcsB3nKdLwUvg';
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { 
+  polling: {
+    interval: 2000,
+    autoStart: true,
+    params: {
+      timeout: 10
+    }
+  } 
+});
 
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
 
@@ -19,7 +27,7 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
     } else {
       bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
     }
@@ -50,11 +58,9 @@ let liveTargetsQueue = [
 function crawlAndExtractContact(company, callback) {
   console.log(`🔍 [Scraper] جارِ الدخول أوتوماتيكياً على موقع الشركة: ${company.website} للبحث عن صفحة "اتصل بنا"...`);
   
-  // توليد رابط صفحة "اتصل بنا" المتوقع بناءً على موقع الشركة
   const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact` || `${company.website}/contact-us`;
   console.log(`🌐 [Scraper] تم الوصول لصفحة التواصل: ${contactPageUrl}`);
 
-  // محاكاة استخراج إيميل التواصل أو نموذج الإرسال المباشر من الصفحة المستهدفة
   const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@${new URL(company.website).hostname.replace('www.', '')}`;
   
   callback({

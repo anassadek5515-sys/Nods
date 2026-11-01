@@ -1,57 +1,72 @@
 import streamlit as st
 import time
 
+# ضبط إعدادات الصفحة
 st.set_page_config(
     page_title="Growth-Hacking SaaS Platform",
     page_icon="🚀",
     layout="wide"
 )
 
+# ---------------------------------------------------------
 # 1. قاعدة البيانات المحلية للشركات والاشتراكات
+# ---------------------------------------------------------
 if "companies_database" not in st.session_state:
     st.session_state["companies_database"] = {
-        "admin123": {"type": "admin", "name": "الأدمن", "status": "active"}
+        "admin123": {"type": "admin", "name": "الأدمن الرئيسية", "status": "active"}
     }
 
 if "current_logged_company" not in st.session_state:
     st.session_state["current_logged_company"] = None
 
+# ---------------------------------------------------------
 # 2. لوحة تحكم الأدمن
+# ---------------------------------------------------------
 if st.session_state["current_logged_company"] == "admin123":
-    st.title("🛡️ لوحة تحكم الأدمن")
-    st.success("متابعة الشركات المشتركة وإدارتها:")
+    st.title("🛡️ لوحة تحكم الأدمن الرئيسية")
+    st.success("متابعة إحصائيات والشركات المشتركة في المنصة:")
     
     total_clients = len(st.session_state["companies_database"]) - 1
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("الشركات المشتركة الفاعلة", f"{total_clients} شركة")
+        st.metric("عدد الشركات المشتركة الفاعلة", f"{total_clients} شركة")
     with col2:
-        st.metric("إجمالي الإيرادات", f"${total_clients * 200}")
+        st.metric("إجمالي الإيرادات المتوقعة", f"${total_clients * 200}")
 
     st.markdown("---")
-    st.subheader("📋 سجل المعاملات والشركات:")
+    st.subheader("📋 سجل المعاملات وبيانات الاشتراكات:")
     st.json(st.session_state["companies_database"])
 
-    if st.button("🚪 خروج الأدمن"):
+    if st.button("🚪 تسجيل خروج الأدمن"):
         st.session_state["current_logged_company"] = None
         st.rerun()
 
-# 3. لوحة تحكم العميل المشترك
+# ---------------------------------------------------------
+# 3. لوحة تحكم العميل المشترك (الشركة المعزولة)
+# ---------------------------------------------------------
 elif st.session_state["current_logged_company"] and st.session_state["current_logged_company"] != "admin123":
     comp_id = st.session_state["current_logged_company"]
-    st.title(f"🔒 لوحة تحكم شركتك المعزولة")
-    st.success(f"✅ اشتراكك مفعل بنجاح! معرف شركتك السري: **{comp_id}**")
+    st.title("🔒 لوحة تحكم شركتك المعزولة")
+    st.success(f"✅ اشتراكك مفعل بنجاح! كود شركتك السري هو: **{comp_id}**")
     
-    st.info("مرحباً بك في بيئة الـ Growth Hacking الخاصة بشركتك. جميع أدواتك جاهزة للعمل.")
+    st.info("💡 مرحباً بك في بيئة الـ Growth Hacking الخاصة بشركتك. جميع الأدوات والبيانات المعزولة جاهزة للعمل.")
     
-    if st.button("🚪 تسجيل خروج"):
+    # هنا تضاف أدوات الـ Growth Hacking للعميل مستقبلاً
+    st.markdown("---")
+    st.subheader("🛠️ أدوات النمو الخاصة بك:")
+    st.write("- أداة استخراج المستهدفين (Active)")
+    st.write("- نظام حملات البريد الآلي (Active)")
+    
+    if st.button("🚪 تسجيل الخروج"):
         st.session_state["current_logged_company"] = None
         st.rerun()
 
-# 4. الواجهة الرئيسية (بوابة الاشتراك والدفع)
+# ---------------------------------------------------------
+# 4. الواجهة الرئيسية (بوابة الاشتراك والدفع بالـ Crypto)
+# ---------------------------------------------------------
 else:
     st.title("🚀 منصة النمو الذكي للشركات ($200/شهر)")
-    st.write("نظام آلي متكامل لجلب العملاء للشركات مع عزل تام لكل عميل.")
+    st.write("نظام آلي متكامل لجلب العملاء للشركات B2B مع عزل تام لكل شركة.")
     st.markdown("---")
 
     tab_pay, tab_login = st.tabs(["💳 الاشتراك والدفع الفوري", "🔑 دخول الشركة"])
@@ -59,17 +74,17 @@ else:
     with tab_pay:
         st.subheader("خطوات الدفع والتفعيل المباشر")
         
-        # عنوان المحفظة الخاص بك اللي طلعته من التطبيق
+        # عنوان المحفظة المعتمد الخاص بك
         my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364" 
         
         st.markdown(f"""
         <div style="background-color: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #1e293b; margin-bottom: 20px;">
-            <h4 style="color: #38bdf8; margin-top: 0;">🌐 معلومات الدفع المباشر (USDT - BEP20):</h4>
-            <p style="color: #e2e8f0;">1️⃣ قم بتحويل مبلغ <b>$200 (USDT)</b> إلى عنوان محفظتك التالي:</p>
+            <h4 style="color: #38bdf8; margin-top: 0;">🌐 معلومات الدفع المباشر (USDT):</h4>
+            <p style="color: #e2e8f0;">1️⃣ قم بتحويل مبلغ <b>$200 (USDT)</b> إلى عنوان المحفظة التالي:</p>
             <div style="background: #1e293b; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
                 {my_usdt_wallet}
             </div>
-            <p style="color: #cbd5e1; margin-bottom: 0;">2️⃣ شبكة التحويل المطلوبة: <b>BNB Smart Chain (BEP20)</b></p>
+            <p style="color: #cbd5e1; margin-bottom: 0;">2️⃣ شبكة التحويل المطلوبة حصراً: <b>BNB Smart Chain (BEP20)</b></p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -86,7 +101,7 @@ else:
                     "created_at": time.time()
                 }
                 st.session_state["current_logged_company"] = new_company_id
-                st.success(f"🎉 تم تفعيل حسابك بنجاح! كود شركتك السري هو: **{new_company_id}**")
+                st.success(f"🎉 تم تفعيل حسابك بنجاح! كود شركتك السري هو: **{new_company_id}** (احتفظ به لتسجيل الدخول مستقبلاً)")
                 time.sleep(2)
                 st.rerun()
             else:
@@ -101,4 +116,4 @@ else:
                 st.session_state["current_logged_company"] = entered_secret
                 st.rerun()
             else:
-                st.error("❌ عذراً، هذا الكود غير مسجل أو خطأ في البيانات.")
+                st.error("❌ عذراً، هذا الكود غير مسجل في النظام.")

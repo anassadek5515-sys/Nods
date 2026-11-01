@@ -3,23 +3,31 @@ const url = require('url');
 
 const PORT = process.env.PORT || 3000;
 
-// ذاكرة مؤقتة لتخزين الروابط المستهدفة
+// استخراج رقم السيرفر أوتوماتيكياً من اسم المضيف أو الرابط (Hostname)
+function getAutoWorkerId() {
+  const host = process.env.VERCEL_URL || '';
+  const match = host.match(/node-prod-0?(\d+)/i) || host.match(/worker-?(\d+)/i);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  // لو مش ظاهر في الرابط، بياخد الرقم من البيئة أو الافتراضي 1
+  return process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
+}
+
+const WORKER_ID = getAutoWorkerId();
+console.log(`🤖 تم تحديد هوية هذا السيرفر تلقائياً: Worker ID = ${WORKER_ID}`);
+
 let globalTargetsQueue = [];
 
-// 1. دالة اسكربت البحث السريع (المدمجة داخلياً)
 async function runFastSearchEngine() {
-  console.log('🔍 جارِ تشغيل اسكربت البحث السريع لجلب مواقع الشركات...');
-  
+  console.log('🔍 جارِ تشغيل اسكربت البحث السريع...');
   const discoveredTargets = [];
   for (let i = 1; i <= 1000; i++) {
     discoveredTargets.push(`https://example-company-${Date.now()}-${i}.com/contact`);
   }
-
   globalTargetsQueue = globalTargetsQueue.concat(discoveredTargets);
-  console.log(`✅ تم جلب وإضافة ${discoveredTargets.length} موقع جديد. الإجمالي في الطابور: ${globalTargetsQueue.length}`);
 }
 
-// تشغيل البحث تلقائياً عند بدء التشغيل
 runFastSearchEngine();
 
 const server = http.createServer((req, res) => {
@@ -35,39 +43,36 @@ const server = http.createServer((req, res) => {
 
   const parsedUrl = url.parse(req.url, true);
 
-  // نقطة فحص الحالة
   if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       status: 'active',
-      message: 'Unified Multi-Worker Outreach Server is Running',
+      workerId: WORKER_ID,
+      message: `Auto-Configured Worker [${WORKER_ID}] is Running`,
       queuedTargets: globalTargetsQueue.length
     }));
     return;
   }
 
-  // نقطة سحب الروابط المخصصة للـ 6 سيرفرات
   if (parsedUrl.pathname === '/api/get-targets' && req.method === 'GET') {
-    const workerId = parsedUrl.query.workerId || 'unknown';
-    
-    // سحب دفعة لكل سيرفر (مثلاً 50 رابط في كل طلب)
     const batchSize = 50;
     const workerBatch = globalTargetsQueue.splice(0, batchSize);
 
-    console.log(`📦 السيرفر رقم [${workerId}] طلب روابط، وتم إرسال ${workerBatch.length} رابط له.`);
+    console.log(`📦 السيرفر رقم [${WORKER_ID}] سحب دفعة بنجاح (${workerBatch.length} رابط).`);
 
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       success: true,
-      workerId: workerId,
+      workerId: WORKER_ID,
       targets: workerBatch
     }));
     return;
   }
 
-  res.writeHead404 ? null : (res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' }), res.end(JSON.stringify({ error: 'Endpoint not found' })));
+  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} with Worker ID: ${WORKER_ID}`);
 });

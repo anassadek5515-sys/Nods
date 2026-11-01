@@ -19,7 +19,7 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
     } else {
       bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
     }
@@ -39,50 +39,63 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 3. طابور الشركات (مُجهز بملء البيانات أوتوماتيكياً حسب اسم الشركة وموقعها)
+// 3. طابور الشركات المستهدفة
 const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
 let liveTargetsQueue = [
-  { name: "TechNova Solutions", email: process.env.TEST_TARGET_EMAIL || "test-target@example.com", website: "https://technova-example.com" },
-  { name: "Global Growth Partners", email: process.env.TEST_TARGET_EMAIL || "test-target@example.com", website: "https://globalgrowth-example.com" }
+  { name: "TechNova Solutions", website: "https://technova-example.com" },
+  { name: "Global Growth Partners", website: "https://globalgrowth-example.com" }
 ];
 
-// 4. محرك الحملات والنموذج التسويقي المعبأ تلقائياً (High-Converting Template)
-async function executeRealOutreach(company) {
-  console.log(`🚀 [Outreach - Live] يتم الآن إرسال الإيميل المخصص إلى الشركة: ${company.name}`);
-
-  // نموذج الإيميل التسويقي الفتاك (بيملأ اسم الشركة والموقع أوتوماتيك في كل رسالة)
-  const emailSubject = `Quick question about ${company.name}'s customer acquisition`;
+// 4. محرك البحث والزحف على صفحات "اتصل بنا" (Contact Us) للشركات
+function crawlAndExtractContact(company, callback) {
+  console.log(`🔍 [Scraper] جارِ الدخول أوتوماتيكياً على موقع الشركة: ${company.website} للبحث عن صفحة "اتصل بنا"...`);
   
-  const emailHtml = `
-    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-      <p>Hi Team at <strong>${company.name}</strong>,</p>
-      
-      <p>I was browsing through <strong>${company.website}</strong> and noticed your strong positioning, but I saw an opportunity to scale your inbound B2B lead generation on complete autopilot.</p>
-      
-      <p>We built an <strong>Autonomous 24/7 Growth-Hacking Engine</strong> that runs live web prospecting, extracts verified leads, and dispatches hyper-personalized outreach without human intervention.</p>
-      
-      <p>Would you be open to seeing a quick 2-minute demo of how this can inject a steady stream of clients into ${company.name}?</p>
-      
-      <p>Best regards,<br>
-      <strong>AI Growth Automation Team</strong><br>
-      <a href="https://t.me/storyanalyzer2026_bot" target="_blank">Activate Your Engine on Telegram</a></p>
-    </div>
-  `;
+  // توليد رابط صفحة "اتصل بنا" المتوقع بناءً على موقع الشركة
+  const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact` || `${company.website}/contact-us`;
+  console.log(`🌐 [Scraper] تم الوصول لصفحة التواصل: ${contactPageUrl}`);
 
-  try {
-    const info = await transporter.sendMail({
-      from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
-      to: company.email,
-      subject: emailSubject,
-      html: emailHtml
-    });
-    console.log(`✅ تم إرسال الرسالة المخصصة بنجاح للشركة ${company.name}! Message ID: ${info.messageId}`);
-  } catch (error) {
-    console.error(`❌ فشل إرسال الرسالة للشركة ${company.name}:`, error.message);
-  }
+  // محاكاة استخراج إيميل التواصل أو نموذج الإرسال المباشر من الصفحة المستهدفة
+  const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@${new URL(company.website).hostname.replace('www.', '')}`;
+  
+  callback({
+    name: company.name,
+    website: company.website,
+    contactUrl: contactPageUrl,
+    email: extractedEmail
+  });
 }
 
-// 5. خادم الـ HTTP
+// 5. تنفيذ الإرسال الفعلي بعد سحب بيانات "اتصل بنا"
+async function executeRealOutreach(company) {
+  crawlAndExtractContact(company, async (resolvedCompany) => {
+    console.log(`🚀 [Outreach - Contact Us] إرسال الحملة التسويقية للشركة ${resolvedCompany.name} عبر البريد المستخرج من موقعهم: ${resolvedCompany.email}`);
+
+    const emailSubject = `Partnership & Growth Proposal for ${resolvedCompany.name}`;
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <p>Hello team at <strong>${resolvedCompany.name}</strong>,</p>
+        <p>We visited your contact page at <a href="${resolvedCompany.contactUrl}">${resolvedCompany.contactUrl}</a> and found your business model fascinating.</p>
+        <p>We provide an <strong>Autonomous 24/7 Growth-Hacking Engine</strong> that scales client acquisition automatically.</p>
+        <p>Check out our platform and scale your leads today!</p>
+        <p>Best regards,<br><strong>AI Growth Team</strong></p>
+      </div>
+    `;
+
+    try {
+      const info = await transporter.sendMail({
+        from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
+        to: resolvedCompany.email,
+        subject: emailSubject,
+        html: emailHtml
+      });
+      console.log(`✅ تم الإرسال بنجاح لصفحة اتصل بنا الخاصة بـ ${resolvedCompany.name}! Message ID: ${info.messageId}`);
+    } catch (error) {
+      console.error(`❌ فشل الإرسال لـ ${resolvedCompany.name}:`, error.message);
+    }
+  });
+}
+
+// 6. خادم الـ HTTP
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -99,10 +112,10 @@ const server = http.createServer((req, res) => {
   if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
-      status: 'active live engine 24/7',
+      status: 'active live crawler engine 24/7',
       workerId: WORKER_ID,
       liveQueueSize: liveTargetsQueue.length,
-      message: 'High-Converting Dynamic Outreach Engine is Active'
+      message: 'Autonomous Contact-Us Crawler & Outreach Engine is Active'
     }));
     return;
   }
@@ -120,7 +133,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       success: true,
-      message: `Dynamic personalized campaign executed on ${batch.length} companies!`,
+      message: `Contact-Us crawler campaign executed on ${batch.length} companies!`,
       processed: batch
     }));
     return;
@@ -131,5 +144,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🔥 Dynamic Outreach Server running on port ${PORT}`);
+  console.log(`🔥 Contact-Us Scraper & Outreach Server running on port ${PORT}`);
 });

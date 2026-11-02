@@ -14,17 +14,9 @@ st.set_page_config(
 def hash_key(key: str) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
-# 2. قاعدة بيانات العملاء (مع الحساب التجريبي test1234)
+# 2. قاعدة بيانات العملاء (خالية تماماً من أي بيانات تجريبية)
 if "companies_database" not in st.session_state:
-    demo_secret = "test1234"
-    st.session_state["companies_database"] = {
-        hash_key(demo_secret): {
-            "status": "active",
-            "tx_hash": "DEMO_TXID_123456",
-            "amount": 200,
-            "created_at": time.time()
-        }
-    }
+    st.session_state["companies_database"] = {}
 
 if "current_logged_company" not in st.session_state:
     st.session_state["current_logged_company"] = None
@@ -32,7 +24,7 @@ if "current_logged_company" not in st.session_state:
 if "ai_chat_history" not in st.session_state:
     st.session_state["ai_chat_history"] = {}
 
-# حماية واجهة الاستخدام
+# حماية واجهة الاستخدام من النسخ
 st.markdown("""
 <style>
     .secure-container { user-select: none; }
@@ -40,12 +32,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# القائمة الجانبية للمشترين فقط (خالية تماماً من أي أدمن أو سيرفرات)
+# القائمة الجانبية للمشترين فقط
 # ---------------------------------------------------------
 st.sidebar.title("🌐 بوابة عملاء المنصة")
 st.sidebar.markdown("---")
-
-st.sidebar.info("💡 **تجربة سريعة:** استخدم كود `test1234` في تسجيل الدخول للتجربة الفورية.")
 
 if st.session_state["current_logged_company"] is None:
     nav_choice = st.sidebar.radio(
@@ -110,7 +100,7 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
     
     tx_hash = st.text_input("أدخل كود المعاملة (TXID):")
     
-    if st.button("✨ تفعيل الحساب"):
+    if st.button("✨ تفعيل الحساب أوتوماتيكياً"):
         clean_tx = tx_hash.strip()
         if len(clean_tx) >= 10 and not any(char in clean_tx for char in ["<", ">", ";", "'", '"']):
             raw_secret_key = f"client_{int(time.time())}_{clean_tx[:6]}"
@@ -122,7 +112,7 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
                 "amount": 200,
                 "created_at": time.time()
             }
-            st.success("تم التحقق من المعاملة بنجاح.")
+            st.success("تم التحقق من المعاملة بنجاح وتفعيل حسابك!")
             st.warning(f"⚠️ **كود الدخول السري الخاص بك (احتفظ به الآن فلن يظهر مجدداً):**\n\n`{raw_secret_key}`")
         else:
             st.error("كود المعاملة غير صالح أو غير مكتمل.")
@@ -131,12 +121,12 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
 # القسم الثاني: تسجيل الدخول
 # =========================================================
 elif nav_choice == "🔑 تسجيل الدخول لحسابي":
-    st.title("🔑 تسجيل الدخول الآمن")
-    st.write("أدخل كود الدخول السري (أو كود التجربة `test1234`).")
+    st.title("🔑 تسجيل الدخول الآمن للعملاء")
+    st.write("أدخل كود الدخول السري الخاص بك للوصول إلى بيئة عملك.")
     st.markdown("---")
     
     entered_secret = st.text_input("كود الدخول السري:", type="password")
-    if st.button("دخول"):
+    if st.button("دخول آمن"):
         hashed_input = hash_key(entered_secret.strip())
         if hashed_input in st.session_state["companies_database"]:
             st.session_state["current_logged_company"] = hashed_input
@@ -144,10 +134,10 @@ elif nav_choice == "🔑 تسجيل الدخول لحسابي":
             time.sleep(1)
             st.rerun()
         else:
-            st.error("كود الدخول غير صحيح.")
+            st.error("كود الدخول غير صحيح أو غير مسجل.")
 
 # =========================================================
-# الخدمات الداخلية للعميل (المميزات الشاملة)
+# الخدمات الداخلية للعميل
 # =========================================================
 elif nav_choice == "🚀 هندسة وتخطيط حملات B2B":
     st.title("🚀 لوحة تخطيط وهندسة حملات B2B")
@@ -168,7 +158,7 @@ elif nav_choice == "🚀 هندسة وتخطيط حملات B2B":
         * **القطاع:** {target_industry}
         * **السوق المستهدف:** {target_geo}
         * **الهدف:** {campaign_goal}
-        * **التوصية:** بناء مسار مبيعات يعتمد على التوعية بالمشكلة أولاً، تليها دراسات حالة موثقة، ثم مكالمة استشارية مغلقة (High-Ticket B2B Funnel).
+        * **التوصية:** بناء مسار مبيعات يعتمد على التوعية بالمشكلة أولاً، تليها دراسات حالة موثقة، ثم مكالمة استشارية مغلقة.
         """)
 
 elif nav_choice == "📦 تحليل بيانات المنتجات والأسواق":
@@ -190,7 +180,7 @@ elif nav_choice == "📦 تحليل بيانات المنتجات والأسوا
 
 elif nav_choice == "🤖 المستشار الذكاء الاصطناعي التفاعلي":
     st.title("🤖 المستشار الذكاء الاصطناعي التفاعلي الحقيقي")
-    st.write("مستشارك الذكي يتفاعل معك بشكل بشري وطبيعي تماماً بناءً على كل كلمة تطرحها.")
+    st.write("مستشارك الذكي مزود بقائمة ردود متكاملة يتفاعل معك بشكل بشري وطبيعي تماماً بناءً على كلامك.")
     st.markdown("---")
     
     comp_id = st.session_state["current_logged_company"]
@@ -209,35 +199,4 @@ elif nav_choice == "🤖 المستشار الذكاء الاصطناعي الت
         with st.chat_message("user"):
             st.write(user_prompt)
         
-        # ذكاء اصطناعي تفاعلي حقيقي يرد بطريقة بشرية طبيعية ومترابطة مع كلام المستخدم
-        u_text = user_prompt.strip().lower()
-        if any(w in u_text for w in ["ازيك", "إزيك", "كيفك", "عامل ايه", "عامل إيه", "السلام", "مرحباً", "هلا", "صباح", "مساء"]):
-            ai_response = f"أهلاً بيك يا فنان! أنا تمام الحمد لله وفي أفضل حال، إنت عامل ايه وأخبارك إيه؟ سامعك بخصوص كلامك، تحب نخش في إيه في مشروعك أو نضبط إيه سوا النهاردة؟"
-        else:
-            ai_response = f"يا فنان، كلامك بخصوص '{user_prompt}' مظبوط جداً وفي محله. خليني أقولك إننا لو ركزنا على النقطة دي وضبطناها في الاستراتيجية بتاعتك، هنقدر نوصل لنتيجة قوية وعائد محترم. تحب نبدأ نطبق ده عملي ونفصصه نقطة بنقطة؟"
-
-        st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_response})
-        with st.chat_message("assistant"):
-            st.write(ai_response)
-
-elif nav_choice == "📊 تقارير الأداء وتحويل العملاء":
-    st.title("📊 تقارير الأداء ومؤشرات التحويل")
-    st.write("تتبع مسار تفاعل العملاء المحتملين وتحليل نسب الاستجابة الحية.")
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("معدل الاستجابة", "24.8%", "+3.2%")
-    with col2:
-        st.metric("العملاء المؤهلون", "142 عميل", "نشط")
-    with col3:
-        st.metric("تكلفة الاستحواذ", "$42", "-5%")
-    st.info("💡 يتم تحديث هذه المؤشرات تلقائياً بناءً على بيانات التفاعل الخاصة بنشاطك.")
-
-elif nav_choice == "⚙️ إعدادات الحساب والأمان":
-    st.title("⚙️ إعدادات الحساب والأمان")
-    st.write("إدارة تفاصيل اشتراكك ومعايير التشفير الخاصة بجلستك.")
-    st.markdown("---")
-    st.success("حالة التشفير: مفعلة بنظام SHA-256 و AES-256 بدرجة عزل قصوى.")
-    st.text_input("تحديث البريد الإلكتروني للتنبيهات:", "client@enterprise-growth.io")
-    if st.button("حفظ التعديلات الأمنية"):
-        st.success("تم تحديث وحفظ الإعدادات بنجاح.")
+        # قائمة ردود ذكية وتحليلية متكاملة

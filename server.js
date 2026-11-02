@@ -5,7 +5,6 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
-// النطاق الكامل لكل مشروع (من 1 إلى 40000)
 const START_ID = 1;
 const END_ID = 40000;
 const SERVER_IDENTITY = process.env.SERVER_IDENTITY || "Outreach-Crawler-Node";
@@ -34,18 +33,15 @@ function getMarketingPayload(companyId) {
   };
 }
 
-// محرك الزحف الحقيقي لجلب وتحليل بيانات الشركات قبل إرسال الحملة
 async function crawlAndDispatch(companyId, nodeId) {
   const targetUrl = `https://company-target-${companyId}-example.com/contact`;
   const marketingPayload = getMarketingPayload(companyId);
 
   try {
-    // جلب صفحة الشركة وتحليلها باستخدام Cheerio
     const response = await axios.get(targetUrl, { timeout: 3000 });
     const $ = cheerio.load(response.data);
     const pageTitle = $('title').text() || 'Target Company';
 
-    // إرسال الحمولة التسويقية للهدف المستخرج
     await axios.post(targetUrl, marketingPayload, { timeout: 3000 });
 
     return {
@@ -57,7 +53,6 @@ async function crawlAndDispatch(companyId, nodeId) {
       target: targetUrl
     };
   } catch (error) {
-    // نظام احتياطي في حال بطء الصفحة أو حمايتها
     await axios.post(targetUrl, marketingPayload, { timeout: 3000 }).catch(() => {});
     return {
       companyId,
@@ -81,7 +76,7 @@ async function runWorkerNode(nodeId, batchSize) {
 
 app.get('/api/execute-campaign', async (req, res) => {
   try {
-    const totalNodes = 2; // سيرفرين متوازيين داخل كل مشروع
+    const totalNodes = 2; // سيرفرين متوازيين داخل المشروع
     const batchPerNode = 30;
     const nodePromises = [];
 

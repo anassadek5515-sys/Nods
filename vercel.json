@@ -1,10 +1,12 @@
 {
-  "name": "outreach-engine",
-  "version": "3.0.0",
-  "main": "server.js",
-  "dependencies": {
-    "axios": "^1.6.0",
-    "cheerio": "^1.0.0-rc.12",
-    "express": "^4.19.2"
-  }
+  "version": 2,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/server.js" }
+  ],
+  "crons": [
+    {
+      "path": "/api/execute-campaign",
+      "schedule": "* * * * *"
+    }
+  ]
 }

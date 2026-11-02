@@ -6,16 +6,15 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
-// ==================== المتغيرات الثابتة مباشرة في الكود ====================
+// المتغيرات الثابتة مباشرة في الكود
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
-const PLATFORM_URL = "https://your-platform-domain.com"; // استبدلها برابط منصتك الحقيقي
+const PLATFORM_URL = "https://your-platform-domain.com";
 
-// إعدادات الـ SMTP (اكتب إيميلك وباسورد التطبيق هنا مباشرة)
+// إعدادات الـ SMTP
 const SMTP_HOST = "smtp.gmail.com";
 const SMTP_PORT = 587;
-const SMTP_USER = "your-email@gmail.com"; // ⚠️ اكتب إيميلك هنا
-const SMTP_PASS = "your-email-password";    // ⚠️ اكتب App Password هنا
-// =========================================================================
+const SMTP_USER = "your-email@gmail.com"; // اكتب إيميلك هنا
+const SMTP_PASS = "your-email-password";    // اكتب App Password هنا
 
 // إعدادات الإرسال الفعلي للإيميلات
 const transporter = nodemailer.createTransport({

@@ -1,5 +1,5 @@
 const http = require('http');
-const https = https = require('https'); // تصحيح بسيط لضمان توافق الاتصال
+const https = require('https');
 const urlModule = require('url');
 const TelegramBot = require('node-telegram-bot-api');
 const nodemailer = require('nodemailer');
@@ -166,12 +166,10 @@ const server = http.createServer((req, res) => {
 
 // 8. محرك التشغيل التلقائي الداخلي (Background Loop) + حماية الـ Keep-Alive في نفس الوقت
 setInterval(() => {
-  // أ. تنفيذ دفعة جديدة من الحملة أوتوماتيكياً كل دقيقة لترى اللوجز تتحرك
   if (globalTargetsQueue.length > 0) {
     executeAutonomousBatch(3);
   }
 
-  // ب. آلية Self-Ping للحفاظ على السيرفر نشطاً
   const selfUrl = process.env.MY_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`);
   const client = selfUrl.startsWith('https') ? https : http;
   
@@ -179,7 +177,7 @@ setInterval(() => {
     // إبقاء السيرفر مستيقظاً بصمت
   }).on('error', () => {});
 
-}, 60000); // كل دقيقة تنفذ دفعة وتجدد النشاط
+}, 60000); // كل دقيقة
 
 server.listen(PORT, () => {
   console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT}`);

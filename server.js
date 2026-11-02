@@ -25,16 +25,13 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
   const contactPageUrl = `${companyWebsite.replace(/\/$/, '')}/contact`;
   
   try {
-    // محاولة جلب صفحة اتصل بنا الحقيقية واستخراج البريد ولغة الموقع
     const response = await axios.get(contactPageUrl, { timeout: 4000 });
     const $ = cheerio.load(response.data);
 
-    // كشف اللغة (عربي أو إنجليزي)
     const langAttr = $('html').attr('lang') || 'en';
     const pageText = $('body').text();
     const isArabic = langAttr.includes('ar') || /[\u0600-\u06FF]/.test(pageText);
 
-    // استخراج البريد الإلكتروني الفعلي من وسوم mailto
     let extractedEmail = null;
     $('a[href^="mailto:"]').each((_, el) => {
       const mailto = $(el).attr('href');
@@ -49,7 +46,6 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
       contactUrl: contactPageUrl
     };
   } catch (error) {
-    // في حال فشل الزحف المباشر، يتم استخدام البريد الافتراضي للطابور مع لغة إنجليزية
     return {
       email: process.env.TEST_TARGET_EMAIL || `contact@company-target-${companyId}-example.com`,
       language: 'en',
@@ -58,7 +54,7 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
   }
 }
 
-// 3. قوالب الرسائل التسويقية الاحترافية متعددة اللغات (مدمج بها محفظة BNB ورابط المنصة)
+// 3. قوالب الرسائل التسويقية الاحترافية متعددة اللغات
 function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   if (lang === 'ar') {
     return {
@@ -117,10 +113,10 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   }
 }
 
-// 4. مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron أو يدويآ)
+// 4. مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron)
 app.get('/api/execute-campaign', async (req, res) => {
   try {
-    const batchSize = 15; // معالجة 15 شركة في كل استدعاء لتجنب حدود وقت Vercel
+    const batchSize = 15;
     let processedCount = 0;
     let results = [];
 
@@ -132,13 +128,9 @@ app.get('/api/execute-campaign', async (req, res) => {
         website: `https://company-target-${companyId}-example.com`
       };
 
-      // أ) الزحف لصفحة اتصل بنا واستخراج البريد ولغة الشركة
       const contactInfo = await crawlAndExtractContact(company.website, company.id);
-
-      // ب) تجهيز القالب التسويقي المناسب للغة الشركة
       const emailContent = getLocalizedEmailContent(company.name, PLATFORM_URL, MY_WALLET, contactInfo.language);
 
-      // ج) الإرسال الفعلي عبر SMTP
       try {
         await transporter.sendMail({
           from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
@@ -172,4 +164,5 @@ app.get('/', (req, res) => {
   });
 });
 
+// تصدير التطبيق ليعمل مع Vercel بنجاح تامة
 module.exports = app;

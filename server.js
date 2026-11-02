@@ -5,13 +5,16 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
+// النطاق الكامل لكل مشروع (من 1 إلى 40000)
 const START_ID = 1;
 const END_ID = 40000;
 const SERVER_IDENTITY = process.env.SERVER_IDENTITY || "Outreach-Crawler-Node";
 
-const TELEGRAM_LINK = process.env.TELEGRAM_LINK || "https://t.me/your-telegram-channel";
-const PLATFORM_URL = process.env.PLATFORM_URL || "https://your-platform-domain.com";
-const MY_WALLET = process.env.MY_WALLET || "0x9426A467E0fFF34981656bd98580f60CFE395364";
+// البيانات الحقيقية مثبتة مباشرة هنا
+const TELEGRAM_LINK = "https://t.me/AI_GrowthAgent_bot";
+const PLATFORM_URL = "https://your-platform-domain.com"; // تقدر تسيبها أو تحط رابط منصتك لو حبّيت
+const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
+const BOT_TOKEN = "9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0";
 
 function getMarketingPayload(companyId) {
   return {
@@ -105,7 +108,8 @@ app.get('/', (req, res) => {
   res.status(200).json({
     status: `${SERVER_IDENTITY} Outreach & Crawler Engine Online 🚀`,
     targetRange: `${START_ID} to ${END_ID}`,
-    mode: 'Cheerio Web Scraping + 2 Parallel Workers'
+    botConnected: TELEGRAM_LINK,
+    mode: 'Hardcoded Credentials + Cheerio + 2 Parallel Workers'
   });
 });
 

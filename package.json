@@ -2,15 +2,11 @@
   "name": "outreach-engine",
   "version": "1.0.0",
   "description": "24/7 Autonomous Outreach Engine",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "main": "index.js",
   "dependencies": {
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.19.2",
-    "node-telegram-bot-api": "^0.65.1",
     "nodemailer": "^6.9.13"
   }
 }

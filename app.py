@@ -43,12 +43,12 @@ if site_choice == "💳 موقع الاشتراك والدفع الفوري":
     my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
     payment_uri = f"ethereum:{my_usdt_wallet}"
     
-    # مربع أحمر صارخ للتنبيه على شبكة BNB لمنع الأخطاء
+    # مربع تنبيه على شبكة BNB لمنع الأخطاء
     st.markdown(f"""
     <div style="background-color: #fee2e2; border: 2px solid #ef4444; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
         <h4 style="color: #991b1b; margin-top: 0;">🚨 تنبيه هامة جداً قبل التحويل:</h4>
         <p style="color: #7f1d1d; font-size: 15px; font-weight: bold;">
-            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span). أي تحويل على شبكة أخرى سيؤدي لضياع الأموال ولن يتم تفعيل حسابك أوتوماتيكياً!
+            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي تحويل على شبكة أخرى سيؤدي لضياع الأموال ولن يتم تفعيل حسابك أوتوماتيكياً!
         </p>
         <hr style="border-color: #fca5a5;">
         <h4 style="color: #1e3a8a; margin-top: 10px;">🌐 عنوان محفظتك المعتمد لاستلام الأرباح:</h4>
@@ -161,7 +161,7 @@ elif site_choice == "🔑 موقع دخول الشركات المستقل":
             
             if comp_id not in st.session_state["ai_chat_history"]:
                 st.session_state["ai_chat_history"][comp_id] = [
-                    {"role": "assistant", "content": "أهلاً بك يا فنان! تذكر دائماً أن مدفوعات الشبكة وتحديثات الاشتراكات تتم حصراً عبر شبكة BNB Smart Chain[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span). كيف أساعدك في تحليل منتجاتك أو إطلاق حملتك اليوم؟"}
+                    {"role": "assistant", "content": "أهلاً بك يا فنان! تذكر دائماً أن مدفوعات الشبكة وتحديثات الاشتراكات تتم حصراً عبر شبكة BNB Smart Chain. كيف أساعدك في تحليل منتجاتك أو إطلاق حملتك اليوم؟"}
                 ]
             
             for msg in st.session_state["ai_chat_history"][comp_id]:
@@ -174,7 +174,7 @@ elif site_choice == "🔑 موقع دخول الشركات المستقل":
                 with st.chat_message("user"):
                     st.write(user_query)
                 
-                ai_reply = f"بناءً على تحليل منتجاتك وبيانات السوق، ولمواصلة العمل بكفاءة عبر شبكة BNB[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)، أقترح عليك تنفيذ الآتي بخصوص طلبك: '{user_query}' لضمان أعلى عائد استثماري."
+                ai_reply = f"بناءً على تحليل منتجاتك وبيانات السوق، ولمواصلة العمل بكفاءة عبر شبكة BNB، أقترح عليك تنفيذ الآتي بخصوص طلبك: '{user_query}' لضمان أعلى عائد استثماري."
                 st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
                 with st.chat_message("assistant"):
                     st.write(ai_reply)

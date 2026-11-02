@@ -34,7 +34,7 @@ async function processCompany(companyId) {
 
 app.get('/api/execute-campaign', async (req, res) => {
   try {
-    const batchSize = 100; // سرعة قصوى لمعالجة الدفعات
+    const batchSize = 100;
     const tasks = [];
 
     for (let i = 0; i < batchSize; i++) {

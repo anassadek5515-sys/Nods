@@ -51,22 +51,25 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 4. تقسيم الـ 40 ألف شركة بحيث كل سيرفر يأخذ حصته الخاصة دون تكرار
-let globalTargetsQueue = [];
-
-for (let i = 1; i <= 40000; i++) {
-  if (i % TOTAL_WORKERS === (WORKER_ID - 1)) {
-    globalTargetsQueue.push({
-      id: i,
-      name: `Target Company #${i}`,
-      website: `https://company-target-${i}-example.com`
-    });
+// 4. دالة إنشاء وتهيئة الطابور الخاص بهذا السيرفر
+function generateQueue() {
+  let queue = [];
+  for (let i = 1; i <= 40000; i++) {
+    if (i % TOTAL_WORKERS === (WORKER_ID - 1)) {
+      queue.push({
+        id: i,
+        name: `Target Company #${i}`,
+        website: `https://company-target-${i}-example.com`
+      });
+    }
   }
+  return queue;
 }
 
+let globalTargetsQueue = generateQueue();
 console.log(`🤖 [Auto-Engine] تم تخصيص وتحميل ${globalTargetsQueue.length} شركة لهذا السيرفر (Worker #${WORKER_ID}) بنجاح!`);
 
-// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا" مع طباعة تفصيلية في اللوجز
+// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا"
 function crawlAndExtractContact(company, callback) {
   const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact`;
   const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@company-target-${company.id}-example.com`;
@@ -81,11 +84,11 @@ function crawlAndExtractContact(company, callback) {
   });
 }
 
-// 6. تنفيذ الإرسال الآلي على دفعات مع تفاصيل واضحة في اللوجز
-async function executeAutonomousBatch(batchSize = 5) {
+// 6. تنفيذ الإرسال الآلي على دفعات (مع إعادة تعبئة الطابور أوتوماتيكياً لو خلص لضمان الاستمرارية للأبد)
+async function executeAutonomousBatch(batchSize = 10) {
   if (globalTargetsQueue.length === 0) {
-    console.log(`✨ [Worker #${WORKER_ID}] تم الانتهاء من إرسال الحملة لكل الشركات المخصصة لهذا السيرفر بنجاح تام!`);
-    return [];
+    console.log(`🔄 [Worker #${WORKER_ID}] انتهت دورة الشركات الحالية، جاري إعادة تعبئة الطابور تلقائياً لتستمر الحملة بلا توقف!`);
+    globalTargetsQueue = generateQueue();
   }
 
   const batch = globalTargetsQueue.splice(0, batchSize);
@@ -142,13 +145,13 @@ const server = http.createServer((req, res) => {
       workerId: WORKER_ID,
       totalWorkers: TOTAL_WORKERS,
       remainingQueueSize: globalTargetsQueue.length,
-      message: `Autonomous Scraper & Outreach Engine (Worker #${WORKER_ID}) is Fully Running`
+      message: `Autonomous Scraper & Outreach Engine (Worker #${WORKER_ID}) is Fully Running 24/7`
     }));
     return;
   }
 
   if (parsedUrl.pathname === '/api/execute-campaign' && req.method === 'GET') {
-    executeAutonomousBatch(5).then(processedBatch => {
+    executeAutonomousBatch(10).then(processedBatch => {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({
         success: true,
@@ -164,11 +167,9 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });
 
-// 8. محرك التشغيل التلقائي الداخلي (Background Loop) + حماية الـ Keep-Alive في نفس الوقت
+// 8. محرك التشغيل السريع والمستمر (يعمل كل 30 ثانية وبدون توقف للأبد)
 setInterval(() => {
-  if (globalTargetsQueue.length > 0) {
-    executeAutonomousBatch(3);
-  }
+  executeAutonomousBatch(10); // يرسل 10 شركات كل 30 ثانية لتغطية المعدل اليومي بالكامل
 
   const selfUrl = process.env.MY_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`);
   const client = selfUrl.startsWith('https') ? https : http;
@@ -177,8 +178,8 @@ setInterval(() => {
     // إبقاء السيرفر مستيقظاً بصمت
   }).on('error', () => {});
 
-}, 60000); // كل دقيقة
+}, 30000); // كل 30 ثانية دفعة جديدة (أكثر من 28 ألف إيميل يومياً لكل السيرفرات بشكل مستمر للأبد)
 
 server.listen(PORT, () => {
-  console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT}`);
+  console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT} [24/7 Infinite Mode]`);
 });

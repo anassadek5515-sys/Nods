@@ -1,12 +1,9 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.js" }
+  "builds": [
+    { "src": "app.py", "use": "@vercel/python" }
   ],
-  "crons": [
-    {
-      "path": "/api/execute-campaign",
-      "schedule": "* * * * *"
-    }
+  "routes": [
+    { "src": "/(.*)", "dest": "app.py" }
   ]
 }

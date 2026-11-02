@@ -1,46 +1,15 @@
-const http = require('http');
-const https = require('https');
-const urlModule = require('url');
-const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
-const PORT = process.env.PORT || 8080;
-
-// 1. تحديد رقم الـ Worker والسيرفر
-const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
-const TOTAL_WORKERS = process.env.TOTAL_WORKERS ? parseInt(process.env.TOTAL_WORKERS, 10) : 6;
-
-console.log(`⚙️ [Config] هذا السيرفر يعمل بـ Worker ID: ${WORKER_ID} من إجمالي ${TOTAL_WORKERS} سيرفرات.`);
-
-// 2. تفعيل بوت تليجرام
-const token = process.env.TELEGRAM_BOT_TOKEN || '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
-const bot = new TelegramBot(token, { polling: true });
-
-bot.on('polling_error', (error) => {
-  if (error.code !== 'ETELEGRAM' || !error.message.includes('409 Conflict')) {
-    console.log(`Telegram polling note: ${error.message}`);
-  }
-});
+const app = express();
+app.use(express.json());
 
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
+const PLATFORM_URL = process.env.PLATFORM_URL || "https://your-platform-domain.com";
 
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
-  const userLang = msg.from.language_code || 'ar';
-
-  if (text && text.toLowerCase().includes('/start')) {
-    if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي (Worker #${WORKER_ID})!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
-    } else {
-      bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform (Worker #${WORKER_ID})!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
-    }
-  } else {
-    bot.sendMessage(chatId, `⚠️ Transfer strictly via *BNB Smart Chain (BEP20)* to:\n\`${MY_WALLET}\``);
-  }
-});
-
-// 3. إعدادات الإرسال الفعلي للإيميلات (SMTP)
+// 1. إعدادات الإرسال الفعلي للإيميلات (SMTP)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
@@ -51,135 +20,156 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 4. دالة إنشاء وتهيئة الطابور الخاص بهذا السيرفر
-function generateQueue() {
-  let queue = [];
-  for (let i = 1; i <= 40000; i++) {
-    if (i % TOTAL_WORKERS === (WORKER_ID - 1)) {
-      queue.push({
-        id: i,
-        name: `Target Company #${i}`,
-        website: `https://company-target-${i}-example.com`
-      });
-    }
-  }
-  return queue;
-}
-
-let globalTargetsQueue = generateQueue();
-console.log(`🤖 [Auto-Engine] تم تخصيص وتحميل ${globalTargetsQueue.length} شركة لهذا السيرفر (Worker #${WORKER_ID}) بنجاح!`);
-
-// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا"
-function crawlAndExtractContact(company, callback) {
-  const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact`;
-  const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@company-target-${company.id}-example.com`;
+// 2. محرك الزحف الذكي لصفحات "اتصل بنا" وكشف لغة الشركة
+async function crawlAndExtractContact(companyWebsite, companyId) {
+  const contactPageUrl = `${companyWebsite.replace(/\/$/, '')}/contact`;
   
-  console.log(`🔍 [Worker #${WORKER_ID}] جاري البحث والزحف لصفحة الاتصال للشركة: ${company.name} (${contactPageUrl})`);
+  try {
+    // محاولة جلب صفحة اتصل بنا الحقيقية واستخراج البريد ولغة الموقع
+    const response = await axios.get(contactPageUrl, { timeout: 4000 });
+    const $ = cheerio.load(response.data);
 
-  callback({
-    name: company.name,
-    website: company.website,
-    contactUrl: contactPageUrl,
-    email: extractedEmail
-  });
+    // كشف اللغة (عربي أو إنجليزي)
+    const langAttr = $('html').attr('lang') || 'en';
+    const pageText = $('body').text();
+    const isArabic = langAttr.includes('ar') || /[\u0600-\u06FF]/.test(pageText);
+
+    // استخراج البريد الإلكتروني الفعلي من وسوم mailto
+    let extractedEmail = null;
+    $('a[href^="mailto:"]').each((_, el) => {
+      const mailto = $(el).attr('href');
+      if (mailto) {
+        extractedEmail = mailto.replace('mailto:', '').split('?')[0];
+      }
+    });
+
+    return {
+      email: extractedEmail || process.env.TEST_TARGET_EMAIL || `contact@company-target-${companyId}-example.com`,
+      language: isArabic ? 'ar' : 'en',
+      contactUrl: contactPageUrl
+    };
+  } catch (error) {
+    // في حال فشل الزحف المباشر، يتم استخدام البريد الافتراضي للطابور مع لغة إنجليزية
+    return {
+      email: process.env.TEST_TARGET_EMAIL || `contact@company-target-${companyId}-example.com`,
+      language: 'en',
+      contactUrl: contactPageUrl
+    };
+  }
 }
 
-// 6. تنفيذ الإرسال الآلي على دفعات (مع إعادة تعبئة الطابور أوتوماتيكياً لو خلص لضمان الاستمرارية للأبد)
-async function executeAutonomousBatch(batchSize = 10) {
-  if (globalTargetsQueue.length === 0) {
-    console.log(`🔄 [Worker #${WORKER_ID}] انتهت دورة الشركات الحالية، جاري إعادة تعبئة الطابور تلقائياً لتستمر الحملة بلا توقف!`);
-    globalTargetsQueue = generateQueue();
-  }
+// 3. قوالب الرسائل التسويقية الاحترافية متعددة اللغات (مدمج بها محفظة BNB ورابط المنصة)
+function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
+  if (lang === 'ar') {
+    return {
+      subject: `🚀 عرض شراكة ونمو استراتيجي لشركة ${companyName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; color: #333; line-height: 1.6; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px; margin: auto;">
+          <h2 style="color: #1e3a8a; text-align: center;">⚡ منصة النمو الذكي وتوليد العملاء</h2>
+          <p>مرحباً فريق <strong>${companyName}</strong>،</p>
+          <p>قمنا بزيارة موقعكم عبر صفحة اتصل بنا، واكتشفنا فرصاً ضخمة لمضاعفة مبيعاتكم عبر محرك النمو الأوتوماتيكي الخاص بنا (يعمل 24/7).</p>
+          
+          <div style="background-color: #f8fafc; border-right: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #047857;">💳 تفاصيل الاشتراك والتفعيل الفوري ($200/شهر):</h3>
+            <p>للاشتراك الفوري وتفعيل نظامك المعزول، يرجى التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b> إلى المحفظة المعتمدة:</p>
+            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">
+              ${wallet}
+            </p>
+            <p style="text-align: center; margin-top: 15px;">
+              <a href="${platformUrl}" target="_blank" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">🌐 زيارة المنصة وبوابة الدفع</a>
+            </p>
+          </div>
 
-  const batch = globalTargetsQueue.splice(0, batchSize);
-  console.log(`📦 [Worker #${WORKER_ID}] بدأ معالجة دفعة جديدة تضم ${batch.length} شركة (المتبقي في الطابور: ${globalTargetsQueue.length})`);
-
-  batch.forEach(company => {
-    crawlAndExtractContact(company, async (resolvedCompany) => {
-      const emailSubject = `Partnership & Scale Proposal for ${resolvedCompany.name}`;
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-          <p>Hello team at <strong>${resolvedCompany.name}</strong>,</p>
-          <p>Our autonomous growth crawler (Worker #${WORKER_ID}) visited your contact channel at <a href="${resolvedCompany.contactUrl}">${resolvedCompany.contactUrl}</a>.</p>
-          <p>We provide a <strong>24/7 B2B Growth-Hacking Engine</strong> that acquires high-value clients on autopilot.</p>
-          <p>Let's scale together!</p>
-          <p>Best regards,<br><strong>AI Growth Team</strong></p>
+          <p>بعد إتمام التحويل، أرسل رقم المعاملة (TXID) عبر موقعنا ليتم تفعيل حسابك أوتوماتيكياً خلال ثوانٍ.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+          <p style="font-size: 12px; color: #64748b; text-align: center;">AI Growth & B2B Scaling Team</p>
         </div>
-      `;
+      `
+    };
+  } else {
+    return {
+      subject: `🚀 Partnership & B2B Growth Proposal for ${companyName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px; margin: auto;">
+          <h2 style="color: #1e3a8a; text-align: center;">⚡ AI Growth & Client Acquisition Platform</h2>
+          <p>Hello team at <strong>${companyName}</strong>,</p>
+          <p>Our autonomous growth crawler visited your contact channel and identified high potential for automated B2B scaling.</p>
+          
+          <div style="background-color: #f8fafc; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #047857;">💳 Instant Subscription ($200/month):</h3>
+            <p>To activate your secure environment, transfer exclusively via <b>BNB Smart Chain (BEP20)</b> to our wallet:</p>
+            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">
+              ${wallet}
+            </p>
+            <p style="text-align: center; margin-top: 15px;">
+              <a href="${platformUrl}" target="_blank" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">🌐 Visit Platform & Activate</a>
+            </p>
+          </div>
 
+          <p>Send your TXID after payment for instant automated provisioning.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+          <p style="font-size: 12px; color: #64748b; text-align: center;">AI Growth & Scaling Team</p>
+        </div>
+      `
+    };
+  }
+}
+
+// 4. مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron أو يدويآ)
+app.get('/api/execute-campaign', async (req, res) => {
+  try {
+    const batchSize = 15; // معالجة 15 شركة في كل استدعاء لتجنب حدود وقت Vercel
+    let processedCount = 0;
+    let results = [];
+
+    for (let i = 1; i <= batchSize; i++) {
+      const companyId = Math.floor(Math.random() * 40000) + 1;
+      const company = {
+        id: companyId,
+        name: `Target Company #${companyId}`,
+        website: `https://company-target-${companyId}-example.com`
+      };
+
+      // أ) الزحف لصفحة اتصل بنا واستخراج البريد ولغة الشركة
+      const contactInfo = await crawlAndExtractContact(company.website, company.id);
+
+      // ب) تجهيز القالب التسويقي المناسب للغة الشركة
+      const emailContent = getLocalizedEmailContent(company.name, PLATFORM_URL, MY_WALLET, contactInfo.language);
+
+      // ج) الإرسال الفعلي عبر SMTP
       try {
         await transporter.sendMail({
           from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
-          to: resolvedCompany.email,
-          subject: emailSubject,
-          html: emailHtml
+          to: contactInfo.email,
+          subject: emailContent.subject,
+          html: emailContent.html
         });
-        console.log(`✅ [Worker #${WORKER_ID} Success] تم إرسال البريد بنجاح إلى: ${resolvedCompany.email} (${resolvedCompany.name})`);
-      } catch (error) {
-        console.error(`❌ [Worker #${WORKER_ID} Error] فشل الإرسال للشركة ${resolvedCompany.name}:`, error.message);
+        results.push({ company: company.name, email: contactInfo.email, lang: contactInfo.language, status: 'sent' });
+        processedCount++;
+      } catch (mailError) {
+        results.push({ company: company.name, email: contactInfo.email, status: 'failed', error: mailError.message });
       }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Vercel Serverless Batch executed! Successfully processed ${processedCount} emails.`,
+      details: results,
+      timestamp: new Date().toISOString()
     });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 5. مسار الفحص العام (Health Check)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'Vercel Autonomous Outreach Engine is Online 🟢',
+    message: 'Serverless architecture ready for 40k batch execution via Cron.'
   });
-
-  return batch;
-}
-
-// 7. خادم الـ HTTP
-const server = http.createServer((req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
-
-  const parsedUrl = urlModule.parse(req.url, true);
-
-  if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({
-      status: 'active 24/7 autonomous growth engine',
-      workerId: WORKER_ID,
-      totalWorkers: TOTAL_WORKERS,
-      remainingQueueSize: globalTargetsQueue.length,
-      message: `Autonomous Scraper & Outreach Engine (Worker #${WORKER_ID}) is Fully Running 24/7`
-    }));
-    return;
-  }
-
-  if (parsedUrl.pathname === '/api/execute-campaign' && req.method === 'GET') {
-    executeAutonomousBatch(10).then(processedBatch => {
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({
-        success: true,
-        message: `Worker #${WORKER_ID} batch executed!`,
-        remainingQueue: globalTargetsQueue.length,
-        processedCount: processedBatch.length
-      }));
-    });
-    return;
-  }
-
-  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });
 
-// 8. محرك التشغيل السريع والمستمر (يعمل كل 30 ثانية وبدون توقف للأبد)
-setInterval(() => {
-  executeAutonomousBatch(10); // يرسل 10 شركات كل 30 ثانية لتغطية المعدل اليومي بالكامل
-
-  const selfUrl = process.env.MY_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`);
-  const client = selfUrl.startsWith('https') ? https : http;
-  
-  client.get(selfUrl, (res) => {
-    // إبقاء السيرفر مستيقظاً بصمت
-  }).on('error', () => {});
-
-}, 30000); // كل 30 ثانية دفعة جديدة (أكثر من 28 ألف إيميل يومياً لكل السيرفرات بشكل مستمر للأبد)
-
-server.listen(PORT, () => {
-  console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT} [24/7 Infinite Mode]`);
-});
+module.exports = app;

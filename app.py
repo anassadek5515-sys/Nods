@@ -15,7 +15,7 @@ st.set_page_config(
 def hash_key(key: str) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
-# 2. قواعد البيانات والذاكرة المحلية المشفرة للعملاء (مضاف فيها حساب تجريبي جاهز)
+# 2. قواعد البيانات والذاكرة المحلية المشفرة للعملاء (مع إبقاء الحساب التجريبي بناءً على رغبتك)
 if "companies_database" not in st.session_state:
     demo_secret = "test1234"
     st.session_state["companies_database"] = {
@@ -41,13 +41,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# القائمة الجانبية النظيفة (الدفع أو تسجيل الدخول)
+# القائمة الجانبية الذكية والمتكيفة مع حالة دخول العميل
 # ---------------------------------------------------------
 st.sidebar.title("🌐 بوابة عملاء المنصة")
 st.sidebar.markdown("---")
 
-# رسالة مساعدة سريعة عشان تجرب الحساب التجريبي
-st.sidebar.info("💡 **للتجربة السريعة:** استخدم كود الدخول التجريبي: `test1234` في قسم تسجيل الدخول.")
+# تذكير بخصوص الحساب التجريبي اللي طلبته يفضل موجود
+st.sidebar.info("💡 **الحساب التجريبي مفعل:** استخدم كود: `test1234` لتسجيل الدخول والتجربة.")
 
 if st.session_state["current_logged_company"] is None:
     nav_choice = st.sidebar.radio(
@@ -64,10 +64,16 @@ else:
         [
             "🚀 أدوات النمو الذكي (B2B)",
             "📦 تحليل المنتجات والبيانات",
-            "🤖 مستشار الذكاء الاصطناعي التخصصي",
-            "🚪 تسجيل الخروج"
+            "🤖 مستشار الذكاء الاصطناعي التخصصي"
         ]
     )
+    
+    st.sidebar.markdown("---")
+    if st.sidebar.button("🚪 تسجيل الخروج"):
+        st.session_state["current_logged_company"] = None
+        st.success("✅ تم تسجيل الخروج بنجاح.")
+        time.sleep(1)
+        st.rerun()
 
 # =========================================================
 # القسم الأول: بوابة الاشتراك والدفع الفوري
@@ -141,7 +147,7 @@ elif nav_choice == "🔑 تسجيل الدخول لحسابي":
             st.error("❌ كود الدخول غير صحيح أو غير مسجل.")
 
 # =========================================================
-# الأقسام الداخلية (تظهر حصراً بعد تسجيل الدخول للعميل)
+# والأقسام الداخلية للعميل
 # =========================================================
 elif nav_choice == "🚀 أدوات النمو الذكي (B2B)":
     st.title("🚀 لوحة أدوات النمو وحملات البناء الآلي")
@@ -199,9 +205,3 @@ elif nav_choice == "🤖 مستشار الذكاء الاصطناعي التخص
         st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
         with st.chat_message("assistant"):
             st.write(ai_reply)
-
-elif nav_choice == "🚪 تسجيل الخروج":
-    st.session_state["current_logged_company"] = None
-    st.success("✅ تم تسجيل الخروج بنجاح.")
-    time.sleep(1)
-    st.rerun()

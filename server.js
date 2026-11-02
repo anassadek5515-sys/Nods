@@ -6,21 +6,29 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
+// ==================== المتغيرات الثابتة مباشرة في الكود ====================
 const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
-const PLATFORM_URL = process.env.PLATFORM_URL || "https://your-platform-domain.com";
+const PLATFORM_URL = "https://your-platform-domain.com"; // استبدلها برابط منصتك الحقيقي
 
-// 1. إعدادات الإرسال الفعلي للإيميلات (SMTP)
+// إعدادات الـ SMTP (اكتب إيميلك وباسورد التطبيق هنا مباشرة)
+const SMTP_HOST = "smtp.gmail.com";
+const SMTP_PORT = 587;
+const SMTP_USER = "your-email@gmail.com"; // ⚠️ اكتب إيميلك هنا
+const SMTP_PASS = "your-email-password";    // ⚠️ اكتب App Password هنا
+// =========================================================================
+
+// إعدادات الإرسال الفعلي للإيميلات
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
+  host: SMTP_HOST,
+  port: SMTP_PORT,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || 'your-email@gmail.com',
-    pass: process.env.SMTP_PASS || 'your-email-password'
+    user: SMTP_USER,
+    pass: SMTP_PASS
   }
 });
 
-// 2. محرك الزحف الذكي لصفحات "اتصل بنا" وكشف لغة الشركة
+// محرك الزحف الذكي لصفحات "اتصل بنا" وكشف لغة الشركة
 async function crawlAndExtractContact(companyWebsite, companyId) {
   const contactPageUrl = `${companyWebsite.replace(/\/$/, '')}/contact`;
   
@@ -41,20 +49,20 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
     });
 
     return {
-      email: extractedEmail || process.env.TEST_TARGET_EMAIL || `contact@company-target-${companyId}-example.com`,
+      email: extractedEmail || `contact@company-target-${companyId}-example.com`,
       language: isArabic ? 'ar' : 'en',
       contactUrl: contactPageUrl
     };
   } catch (error) {
     return {
-      email: process.env.TEST_TARGET_EMAIL || `contact@company-target-${companyId}-example.com`,
+      email: `contact@company-target-${companyId}-example.com`,
       language: 'en',
       contactUrl: contactPageUrl
     };
   }
 }
 
-// 3. قوالب الرسائل التسويقية الاحترافية متعددة اللغات
+// قوالب الرسائل التسويقية الاحترافية متعددة اللغات
 function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   if (lang === 'ar') {
     return {
@@ -113,7 +121,7 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   }
 }
 
-// 4. مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron)
+// مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron)
 app.get('/api/execute-campaign', async (req, res) => {
   try {
     const batchSize = 15;
@@ -133,7 +141,7 @@ app.get('/api/execute-campaign', async (req, res) => {
 
       try {
         await transporter.sendMail({
-          from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
+          from: `"AI Growth Platform" <${SMTP_USER}>`,
           to: contactInfo.email,
           subject: emailContent.subject,
           html: emailContent.html
@@ -156,7 +164,7 @@ app.get('/api/execute-campaign', async (req, res) => {
   }
 });
 
-// 5. مسار الفحص العام (Health Check)
+// مسار الفحص العام
 app.get('/', (req, res) => {
   res.status(200).json({
     status: 'Vercel Autonomous Outreach Engine is Online 🟢',

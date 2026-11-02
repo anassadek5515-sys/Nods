@@ -6,16 +6,13 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
-// متغيرات البيئة مع قيم افتراضية لتعمل مباشرة بدون أي إعدادات يدوية
 const MY_WALLET = process.env.MY_WALLET || "0x9426A467E0fFF34981656bd98580f60CFE395364";
 const PLATFORM_URL = process.env.PLATFORM_URL || "https://your-platform-domain.com";
-
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
 const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
 const SMTP_USER = process.env.SMTP_USER || "your-email@gmail.com";
 const SMTP_PASS = process.env.SMTP_PASS || "your-email-password";
 
-// إعدادات الإرسال الفعلي
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
@@ -26,7 +23,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// محرك الزحف الذكي لصفحات "اتصل بنا" وكشف لغة الشركة
 async function crawlAndExtractContact(companyWebsite, companyId) {
   const contactPageUrl = `${companyWebsite.replace(/\/$/, '')}/contact`;
   
@@ -60,7 +56,6 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
   }
 }
 
-// قوالب الرسائل التسويقية (عربي / إنجليزي)
 function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   if (lang === 'ar') {
     return {
@@ -119,7 +114,6 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   }
 }
 
-// مسار التنفيذ الأوتوماتيكي (يعمل ذاتياً كل دقيقة عبر Vercel Cron)
 app.get('/api/execute-campaign', async (req, res) => {
   try {
     const batchSize = 15;
@@ -153,7 +147,7 @@ app.get('/api/execute-campaign', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Autonomous Cron Batch executed! Processed ${processedCount} emails.`,
+      message: `Vercel Serverless Batch executed! Successfully processed ${processedCount} emails.`,
       details: results,
       timestamp: new Date().toISOString()
     });
@@ -164,8 +158,8 @@ app.get('/api/execute-campaign', async (req, res) => {
 
 app.get('/', (req, res) => {
   res.status(200).json({
-    status: 'Autonomous Outreach Engine is Online 🟢',
-    mode: 'Self-running via Vercel Cron 24/7'
+    status: 'Vercel Autonomous Outreach Engine is Online 🟢',
+    message: 'Serverless architecture ready for 40k batch execution via Cron.'
   });
 });
 

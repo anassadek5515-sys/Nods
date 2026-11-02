@@ -1,17 +1,18 @@
 const http = require('http');
+const https = require('https');
 const urlModule = require('url');
 const TelegramBot = require('node-telegram-bot-api');
 const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 8080;
 
-// 1. تحديد رقم الـ Worker والسيرفر (مثلاً 1، 2، أو 3 لكل حساب)
+// 1. تحديد رقم الـ Worker والسيرفر
 const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
-const TOTAL_WORKERS = process.env.TOTAL_WORKERS ? parseInt(process.env.TOTAL_WORKERS, 10) : 3; // إجمالي السيرفرات اللي شغالة مع بعض
+const TOTAL_WORKERS = process.env.TOTAL_WORKERS ? parseInt(process.env.TOTAL_WORKERS, 10) : 6;
 
 console.log(`⚙️ [Config] هذا السيرفر يعمل بـ Worker ID: ${WORKER_ID} من إجمالي ${TOTAL_WORKERS} سيرفرات.`);
 
-// 2. تفعيل بوت تليجرام (نفس التوكن النظيف)
+// 2. تفعيل بوت تليجرام
 const token = process.env.TELEGRAM_BOT_TOKEN || '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
 const bot = new TelegramBot(token, { polling: true });
 
@@ -50,11 +51,10 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 4. تقسيم الـ 40 ألف شركة بحيث كل سيرفر (Worker) يأخذ حصته الخاصة فقط دون تكرار!
+// 4. تقسيم الـ 40 ألف شركة بحيث كل سيرفر يأخذ حصته الخاصة دون تكرار
 let globalTargetsQueue = [];
 
 for (let i = 1; i <= 40000; i++) {
-  // توزيع الشركات بالباقي (Modulo) لضمان عدم تكرار أي شركة بين السيرفرات
   if (i % TOTAL_WORKERS === (WORKER_ID - 1)) {
     globalTargetsQueue.push({
       id: i,
@@ -164,6 +164,19 @@ const server = http.createServer((req, res) => {
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });
+
+// 8. آلية Self-Ping المباشرة (كل سيرفر يبعت لرابطه الشخصي أو لوكال هوست لو شغال محلي)
+setInterval(() => {
+  // يقدر ياخد رابطه مباشرة من متغير بيئي اسمه MY_APP_URL أو يضرب على نفسه
+  const selfUrl = process.env.MY_APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`;
+  
+  const client = selfUrl.startsWith('https') ? https : http;
+  client.get(selfUrl, (res) => {
+    console.log(`🟢 [Self-Ping] Worker #${WORKER_ID} kept alive successfully (Status: ${res.statusCode})`);
+  }).on('error', (err) => {
+    // تجاهل الأخطاء المؤقتة
+  });
+}, 120000); // كل دقيقتين
 
 server.listen(PORT, () => {
   console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT}`);

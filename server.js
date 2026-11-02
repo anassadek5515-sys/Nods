@@ -164,5 +164,4 @@ app.get('/', (req, res) => {
   });
 });
 
-// تصدير التطبيق ليعمل مع Vercel بنجاح تامة
 module.exports = app;

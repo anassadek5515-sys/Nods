@@ -1,13 +1,18 @@
 const http = require('http');
 const urlModule = require('url');
 const TelegramBot = require('node-telegram-bot-api');
-const https = require('https');
 const nodemailer = require('nodemailer');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-// 1. تفعيل بوت تليجرام بالتوكن النظيف مع معالجة صامتة للأخطاء
-const token = '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
+// 1. تحديد رقم الـ Worker والسيرفر (مثلاً 1، 2، أو 3 لكل حساب)
+const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
+const TOTAL_WORKERS = process.env.TOTAL_WORKERS ? parseInt(process.env.TOTAL_WORKERS, 10) : 3; // إجمالي السيرفرات اللي شغالة مع بعض
+
+console.log(`⚙️ [Config] هذا السيرفر يعمل بـ Worker ID: ${WORKER_ID} من إجمالي ${TOTAL_WORKERS} سيرفرات.`);
+
+// 2. تفعيل بوت تليجرام (نفس التوكن النظيف)
+const token = process.env.TELEGRAM_BOT_TOKEN || '9027188192:AAEP1owJN2jWorCHVOrZY_XrhyFq1ZJ1jx0';
 const bot = new TelegramBot(token, { polling: true });
 
 bot.on('polling_error', (error) => {
@@ -25,16 +30,16 @@ bot.on('message', (msg) => {
 
   if (text && text.toLowerCase().includes('/start')) {
     if (userLang.startsWith('ar')) {
-      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
+      bot.sendMessage(chatId, `🚀 أهلاً بك في منصة النمو الذكي (Worker #${WORKER_ID})!\n\nللاشتراك وتفعيل نظامك الفوري (200 دولار)، يرجى التحويل حصراً عبر شبكة:\n🔸 *BNB Smart Chain (BEP20)*\n\nمحفظتنا المعتمدة للاستلام:\n\`${MY_WALLET}\`\n\nبعد الدفع، أرسل رقم المعاملة (TXID) هنا وسيتم التفعيل أوتوماتيكياً!`);
     } else {
-      bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
+      bot.sendMessage(chatId, `🚀 Welcome to AI Growth Platform (Worker #${WORKER_ID})!\n\nTo subscribe ($200), please transfer exclusively via:\n🔸 *BNB Smart Chain (BEP20)*\n\nWallet:\n\`${MY_WALLET}\`\n\nSend your TXID after payment!`);
     }
   } else {
     bot.sendMessage(chatId, `⚠️ Transfer strictly via *BNB Smart Chain (BEP20)* to:\n\`${MY_WALLET}\``);
   }
 });
 
-// 2. إعدادات الإرسال الفعلي للإيميلات (SMTP)
+// 3. إعدادات الإرسال الفعلي للإيميلات (SMTP)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
@@ -45,27 +50,24 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 3. طابور البحث التلقائي الممتد (هنا بيتخزن الـ 40 ألف شركة أو الليسته بتاعتك)
-const WORKER_ID = process.env.WORKER_ID ? parseInt(process.env.WORKER_ID, 10) : 1;
-
-// مصفوفة ديناميكية تكبر أوتوماتيكياً أو تتغذى ببيانات الشركات المستهدفة
+// 4. تقسيم الـ 40 ألف شركة بحيث كل سيرفر (Worker) يأخذ حصته الخاصة فقط دون تكرار!
 let globalTargetsQueue = [];
 
-// توليد قاعدة تجريبية آلية (تخيل دول الـ 40 ألف شركة مستهدفة اللي بيبحث عنهم النظام يومياً)
 for (let i = 1; i <= 40000; i++) {
-  globalTargetsQueue.push({
-    id: i,
-    name: `Target Company #${i}`,
-    website: `https://company-target-${i}-example.com`
-  });
+  // توزيع الشركات بالباقي (Modulo) لضمان عدم تكرار أي شركة بين السيرفرات
+  if (i % TOTAL_WORKERS === (WORKER_ID - 1)) {
+    globalTargetsQueue.push({
+      id: i,
+      name: `Target Company #${i}`,
+      website: `https://company-target-${i}-example.com`
+    });
+  }
 }
 
-console.log(`🤖 [Auto-Engine] تم تحميل وتجهيز ${globalTargetsQueue.length} شركة في طابور البحث التلقائي بنجاح!`);
+console.log(`🤖 [Auto-Engine] تم تخصيص وتحميل ${globalTargetsQueue.length} شركة لهذا السيرفر (Worker #${WORKER_ID}) بنجاح!`);
 
-// 4. محرك البحث والزحف الذكي لصفحات "اتصل بنا"
+// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا"
 function crawlAndExtractContact(company, callback) {
-  console.log(`🔍 [Auto-Scraper] جارِ البحث أوتوماتيكياً في موقع الشركة #${company.id}: ${company.website} عن صفحة "اتصل بنا"...`);
-  
   const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact`;
   const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@company-target-${company.id}-example.com`;
   
@@ -77,15 +79,13 @@ function crawlAndExtractContact(company, callback) {
   });
 }
 
-// 5. تنفيذ الإرسال الآلي ودفع الحملات دفعات منتظمة
+// 6. تنفيذ الإرسال الآلي على دفعات منتظمة لهذا السيرفر
 async function executeAutonomousBatch(batchSize = 10) {
   if (globalTargetsQueue.length === 0) {
-    console.log(`⚠️ [Queue] الطابور انتهى بالكامل!`);
     return [];
   }
 
   const batch = globalTargetsQueue.splice(0, batchSize);
-  console.log(`🚀 [Campaign] بدء معالجة دفعة جديدة تتضمن ${batch.length} شركة أوتوماتيكياً...`);
 
   batch.forEach(company => {
     crawlAndExtractContact(company, async (resolvedCompany) => {
@@ -93,7 +93,7 @@ async function executeAutonomousBatch(batchSize = 10) {
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
           <p>Hello team at <strong>${resolvedCompany.name}</strong>,</p>
-          <p>Our autonomous growth crawler visited your contact channel at <a href="${resolvedCompany.contactUrl}">${resolvedCompany.contactUrl}</a>.</p>
+          <p>Our autonomous growth crawler (Worker #${WORKER_ID}) visited your contact channel at <a href="${resolvedCompany.contactUrl}">${resolvedCompany.contactUrl}</a>.</p>
           <p>We provide a <strong>24/7 B2B Growth-Hacking Engine</strong> that acquires high-value clients on autopilot.</p>
           <p>Let's scale together!</p>
           <p>Best regards,<br><strong>AI Growth Team</strong></p>
@@ -101,15 +101,14 @@ async function executeAutonomousBatch(batchSize = 10) {
       `;
 
       try {
-        const info = await transporter.sendMail({
+        await transporter.sendMail({
           from: '"AI Growth Platform" <' + (process.env.SMTP_USER || 'no-reply@saas.com') + '>',
           to: resolvedCompany.email,
           subject: emailSubject,
           html: emailHtml
         });
-        console.log(`✅ [Sent OK] تم إرسال الحملة بنجاح إلى: ${resolvedCompany.email} (ID: ${info.messageId})`);
       } catch (error) {
-        console.error(`❌ [Error] فشل الإرسال للشركة ${resolvedCompany.name}:`, error.message);
+        console.error(`❌ [Worker #${WORKER_ID} Error] فشل الإرسال للشركة ${resolvedCompany.name}:`, error.message);
       }
     });
   });
@@ -117,7 +116,7 @@ async function executeAutonomousBatch(batchSize = 10) {
   return batch;
 }
 
-// 6. خادم الـ HTTP
+// 7. خادم الـ HTTP
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -136,26 +135,25 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
       status: 'active 24/7 autonomous growth engine',
       workerId: WORKER_ID,
+      totalWorkers: TOTAL_WORKERS,
       remainingQueueSize: globalTargetsQueue.length,
-      message: 'Autonomous Scraper & Outreach Engine is Fully Running'
+      message: `Autonomous Scraper & Outreach Engine (Worker #${WORKER_ID}) is Fully Running`
     }));
     return;
   }
 
-  // مسار تنفيذ الحملة التلقائية (الكرون جوب ينادي عليه)
   if (parsedUrl.pathname === '/api/execute-campaign' && req.method === 'GET') {
     if (globalTargetsQueue.length === 0) {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ success: false, message: 'All 40,000 targets have been processed!' }));
+      res.end(JSON.stringify({ success: false, message: `Worker #${WORKER_ID} has processed all assigned targets!` }));
       return;
     }
 
-    // نفذ دفعة من 10 شركات في كل نبضة كرون-جوب عشان نحافظ على أمان الإيميلات
     executeAutonomousBatch(10).then(processedBatch => {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({
         success: true,
-        message: `Autonomous batch campaign executed successfully!`,
+        message: `Worker #${WORKER_ID} batch campaign executed successfully!`,
         remainingQueue: globalTargetsQueue.length,
         processedCount: processedBatch.length
       }));
@@ -168,5 +166,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🔥 40k Autonomous Growth Engine running on port ${PORT}`);
+  console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT}`);
 });

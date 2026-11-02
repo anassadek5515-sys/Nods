@@ -6,17 +6,16 @@ const cheerio = require('cheerio');
 const app = express();
 app.use(express.json());
 
-// المتغيرات الثابتة مباشرة في الكود
-const MY_WALLET = "0x9426A467E0fFF34981656bd98580f60CFE395364";
-const PLATFORM_URL = "https://your-platform-domain.com";
+// متغيرات البيئة مع قيم افتراضية لتعمل مباشرة بدون أي إعدادات يدوية
+const MY_WALLET = process.env.MY_WALLET || "0x9426A467E0fFF34981656bd98580f60CFE395364";
+const PLATFORM_URL = process.env.PLATFORM_URL || "https://your-platform-domain.com";
 
-// إعدادات الـ SMTP
-const SMTP_HOST = "smtp.gmail.com";
-const SMTP_PORT = 587;
-const SMTP_USER = "your-email@gmail.com"; // اكتب إيميلك هنا
-const SMTP_PASS = "your-email-password";    // اكتب App Password هنا
+const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
+const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
+const SMTP_USER = process.env.SMTP_USER || "your-email@gmail.com";
+const SMTP_PASS = process.env.SMTP_PASS || "your-email-password";
 
-// إعدادات الإرسال الفعلي للإيميلات
+// إعدادات الإرسال الفعلي
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
@@ -61,7 +60,7 @@ async function crawlAndExtractContact(companyWebsite, companyId) {
   }
 }
 
-// قوالب الرسائل التسويقية الاحترافية متعددة اللغات
+// قوالب الرسائل التسويقية (عربي / إنجليزي)
 function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   if (lang === 'ar') {
     return {
@@ -120,7 +119,7 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
   }
 }
 
-// مسار تشغيل الحملة على دفعات (يتم استدعاؤه تلقائياً بواسطة Vercel Cron)
+// مسار التنفيذ الأوتوماتيكي (يعمل ذاتياً كل دقيقة عبر Vercel Cron)
 app.get('/api/execute-campaign', async (req, res) => {
   try {
     const batchSize = 15;
@@ -154,7 +153,7 @@ app.get('/api/execute-campaign', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Vercel Serverless Batch executed! Successfully processed ${processedCount} emails.`,
+      message: `Autonomous Cron Batch executed! Processed ${processedCount} emails.`,
       details: results,
       timestamp: new Date().toISOString()
     });
@@ -163,11 +162,10 @@ app.get('/api/execute-campaign', async (req, res) => {
   }
 });
 
-// مسار الفحص العام
 app.get('/', (req, res) => {
   res.status(200).json({
-    status: 'Vercel Autonomous Outreach Engine is Online 🟢',
-    message: 'Serverless architecture ready for 40k batch execution via Cron.'
+    status: 'Autonomous Outreach Engine is Online 🟢',
+    mode: 'Self-running via Vercel Cron 24/7'
   });
 });
 

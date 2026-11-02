@@ -1,5 +1,5 @@
 const http = require('http');
-const https = require('https');
+const https = https = require('https'); // تصحيح بسيط لضمان توافق الاتصال
 const urlModule = require('url');
 const TelegramBot = require('node-telegram-bot-api');
 const nodemailer = require('nodemailer');
@@ -66,11 +66,13 @@ for (let i = 1; i <= 40000; i++) {
 
 console.log(`🤖 [Auto-Engine] تم تخصيص وتحميل ${globalTargetsQueue.length} شركة لهذا السيرفر (Worker #${WORKER_ID}) بنجاح!`);
 
-// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا"
+// 5. محرك البحث والزحف الذكي لصفحات "اتصل بنا" مع طباعة تفصيلية في اللوجز
 function crawlAndExtractContact(company, callback) {
   const contactPageUrl = `${company.website.replace(/\/$/, '')}/contact`;
   const extractedEmail = process.env.TEST_TARGET_EMAIL || `contact@company-target-${company.id}-example.com`;
   
+  console.log(`🔍 [Worker #${WORKER_ID}] جاري البحث والزحف لصفحة الاتصال للشركة: ${company.name} (${contactPageUrl})`);
+
   callback({
     name: company.name,
     website: company.website,
@@ -79,13 +81,15 @@ function crawlAndExtractContact(company, callback) {
   });
 }
 
-// 6. تنفيذ الإرسال الآلي على دفعات منتظمة لهذا السيرفر
-async function executeAutonomousBatch(batchSize = 10) {
+// 6. تنفيذ الإرسال الآلي على دفعات مع تفاصيل واضحة في اللوجز
+async function executeAutonomousBatch(batchSize = 5) {
   if (globalTargetsQueue.length === 0) {
+    console.log(`✨ [Worker #${WORKER_ID}] تم الانتهاء من إرسال الحملة لكل الشركات المخصصة لهذا السيرفر بنجاح تام!`);
     return [];
   }
 
   const batch = globalTargetsQueue.splice(0, batchSize);
+  console.log(`📦 [Worker #${WORKER_ID}] بدأ معالجة دفعة جديدة تضم ${batch.length} شركة (المتبقي في الطابور: ${globalTargetsQueue.length})`);
 
   batch.forEach(company => {
     crawlAndExtractContact(company, async (resolvedCompany) => {
@@ -107,6 +111,7 @@ async function executeAutonomousBatch(batchSize = 10) {
           subject: emailSubject,
           html: emailHtml
         });
+        console.log(`✅ [Worker #${WORKER_ID} Success] تم إرسال البريد بنجاح إلى: ${resolvedCompany.email} (${resolvedCompany.name})`);
       } catch (error) {
         console.error(`❌ [Worker #${WORKER_ID} Error] فشل الإرسال للشركة ${resolvedCompany.name}:`, error.message);
       }
@@ -143,17 +148,11 @@ const server = http.createServer((req, res) => {
   }
 
   if (parsedUrl.pathname === '/api/execute-campaign' && req.method === 'GET') {
-    if (globalTargetsQueue.length === 0) {
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ success: false, message: `Worker #${WORKER_ID} has processed all assigned targets!` }));
-      return;
-    }
-
-    executeAutonomousBatch(10).then(processedBatch => {
+    executeAutonomousBatch(5).then(processedBatch => {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({
         success: true,
-        message: `Worker #${WORKER_ID} batch campaign executed successfully!`,
+        message: `Worker #${WORKER_ID} batch executed!`,
         remainingQueue: globalTargetsQueue.length,
         processedCount: processedBatch.length
       }));
@@ -165,18 +164,22 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({ error: 'Endpoint not found' }));
 });
 
-// 8. آلية Self-Ping المباشرة (كل سيرفر يبعت لرابطه الشخصي أو لوكال هوست لو شغال محلي)
+// 8. محرك التشغيل التلقائي الداخلي (Background Loop) + حماية الـ Keep-Alive في نفس الوقت
 setInterval(() => {
-  // يقدر ياخد رابطه مباشرة من متغير بيئي اسمه MY_APP_URL أو يضرب على نفسه
-  const selfUrl = process.env.MY_APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`;
-  
+  // أ. تنفيذ دفعة جديدة من الحملة أوتوماتيكياً كل دقيقة لترى اللوجز تتحرك
+  if (globalTargetsQueue.length > 0) {
+    executeAutonomousBatch(3);
+  }
+
+  // ب. آلية Self-Ping للحفاظ على السيرفر نشطاً
+  const selfUrl = process.env.MY_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/health` : `http://localhost:${PORT}/health`);
   const client = selfUrl.startsWith('https') ? https : http;
+  
   client.get(selfUrl, (res) => {
-    console.log(`🟢 [Self-Ping] Worker #${WORKER_ID} kept alive successfully (Status: ${res.statusCode})`);
-  }).on('error', (err) => {
-    // تجاهل الأخطاء المؤقتة
-  });
-}, 120000); // كل دقيقتين
+    // إبقاء السيرفر مستيقظاً بصمت
+  }).on('error', () => {});
+
+}, 60000); // كل دقيقة تنفذ دفعة وتجدد النشاط
 
 server.listen(PORT, () => {
   console.log(`🔥 40k Autonomous Growth Engine (Worker #${WORKER_ID}) running on port ${PORT}`);

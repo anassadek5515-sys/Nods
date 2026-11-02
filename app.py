@@ -3,7 +3,7 @@ import time
 import pandas as pd
 import hashlib
 
-# 1. إعدادات الأمان المتقدمة للصفحة
+# 1. إعدادات الأمان المتقدمة للصفحة والدعم التلقائي
 st.set_page_config(
     page_title="Secure B2B Growth Platform",
     page_icon="🛡️",
@@ -15,9 +15,17 @@ st.set_page_config(
 def hash_key(key: str) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
-# 2. قواعد البيانات والذاكرة المحلية المشفرة للعملاء فقط
+# 2. قواعد البيانات والذاكرة المحلية المشفرة للعملاء (مضاف فيها حساب تجريبي جاهز)
 if "companies_database" not in st.session_state:
-    st.session_state["companies_database"] = {}
+    demo_secret = "test1234"
+    st.session_state["companies_database"] = {
+        hash_key(demo_secret): {
+            "status": "active",
+            "tx_hash": "DEMO_TXID_123456",
+            "amount": 200,
+            "created_at": time.time()
+        }
+    }
 
 if "current_logged_company" not in st.session_state:
     st.session_state["current_logged_company"] = None
@@ -25,7 +33,7 @@ if "current_logged_company" not in st.session_state:
 if "ai_chat_history" not in st.session_state:
     st.session_state["ai_chat_history"] = {}
 
-# حماية واجهة الاستخدام من التحديد والنسخ غير المبرر
+# حماية واجهة الاستخدام من النسخ غير المبرر
 st.markdown("""
 <style>
     .secure-container { user-select: none; }
@@ -33,24 +41,36 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# القائمة الجانبية المخصصة للمشترين فقط (بدون أي أسرار تخصك)
+# القائمة الجانبية النظيفة (الدفع أو تسجيل الدخول)
 # ---------------------------------------------------------
 st.sidebar.title("🌐 بوابة عملاء المنصة")
 st.sidebar.markdown("---")
 
-nav_choice = st.sidebar.radio(
-    "اختر القسم:",
-    [
-        "💳 بوابة الاشتراك والدفع الفوري",
-        "🔑 تسجيل الدخول لحسابي",
-        "🚀 أدوات النمو الذكي (B2B)",
-        "📦 تحليل المنتجات والبيانات",
-        "🤖 مستشار الذكاء الاصطناعي التخصصي"
-    ]
-)
+# رسالة مساعدة سريعة عشان تجرب الحساب التجريبي
+st.sidebar.info("💡 **للتجربة السريعة:** استخدم كود الدخول التجريبي: `test1234` في قسم تسجيل الدخول.")
+
+if st.session_state["current_logged_company"] is None:
+    nav_choice = st.sidebar.radio(
+        "اختر القسم:",
+        [
+            "💳 بوابة الاشتراك والدفع الفوري",
+            "🔑 تسجيل الدخول لحسابي"
+        ]
+    )
+else:
+    st.sidebar.success("🟢 أنت مسجل الدخول بحسابك المعزول")
+    nav_choice = st.sidebar.radio(
+        "لوحة التحكم الخاصة بك:",
+        [
+            "🚀 أدوات النمو الذكي (B2B)",
+            "📦 تحليل المنتجات والبيانات",
+            "🤖 مستشار الذكاء الاصطناعي التخصصي",
+            "🚪 تسجيل الخروج"
+        ]
+    )
 
 # =========================================================
-# القسم الأول: بوابة الاشتراك والدفع الفوري (وتوليد الكود التلقائي)
+# القسم الأول: بوابة الاشتراك والدفع الفوري
 # =========================================================
 if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
     st.title("🛡️ منصة النمو الذكي المشفرة ($200/شهر)")
@@ -97,105 +117,91 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
                 "created_at": time.time()
             }
             st.success("🎉 تم التحقق من المعاملة وتسجيل حسابك باسمك أوتوماتيكياً بنجاح!")
-            st.warning(f"⚠️ **كود الدخول السري الخاص بك (احتفظ به جيداً فلن يظهر مرة أخرى):**\n\n`{raw_secret_key}`\n\n*الآن انتقل إلى قسم (تسجيل الدخول لحسابي) من القائمة الجانبية وادخل بهذا الكود.*")
+            st.warning(f"⚠️ **كود الدخول السري الخاص بك (احتفظ به جيداً فلن يظهر مرة أخرى):**\n\n`{raw_secret_key}`\n\n*الآن انتقل إلى قسم (تسجيل الدخول لحسابي) من القائمة الجانبية وادخل بهذا الكود لتفتح لك لوحة التحكم الخاصة بك.*")
         else:
             st.error("❌ كود التحويل غير صالح أو غير مكتمل.")
 
 # =========================================================
-# القسم الثاني: تسجيل الدخول للوحة التحكم
+# القسم الثاني: تسجيل الدخول لحساب العميل
 # =========================================================
 elif nav_choice == "🔑 تسجيل الدخول لحسابي":
     st.title("🔑 بوابة الدخول الآمن للعملاء")
-    st.write("أدخل كود الدخول السري الذي حصلت عليه بعد الدفع للوصول لبيئة عملك المعزولة.")
+    st.write("أدخل كود الدخول السري (يمكنك استخدام كود التجربة: `test1234`) للوصول لبيئة عملك المعزولة.")
     st.markdown("---")
     
-    if st.session_state["current_logged_company"] is None:
-        entered_secret = st.text_input("أدخل كود الدخول السري الخاص بك:", type="password")
-        if st.button("🔐 دخول آمن لحسابي"):
-            hashed_input = hash_key(entered_secret.strip())
-            if hashed_input in st.session_state["companies_database"]:
-                st.session_state["current_logged_company"] = hashed_input
-                st.success("✅ أهلاً بك! تم تسجيل دخولك بنجاح. يمكنك الآن الانتقال لأي قسم من القائمة الجانبية.")
-                st.rerun()
-            else:
-                st.error("❌ كود الدخول غير صحيح أو غير مسجل.")
-    else:
-        st.success("🟢 أنت مسجل الدخول بحسابك المعزول والآمن.")
-        if st.button("🚪 تسجيل الخروج"):
-            st.session_state["current_logged_company"] = None
+    entered_secret = st.text_input("أدخل كود الدخول السري الخاص بك:", type="password")
+    if st.button("🔐 دخول آمن لحسابي"):
+        hashed_input = hash_key(entered_secret.strip())
+        if hashed_input in st.session_state["companies_database"]:
+            st.session_state["current_logged_company"] = hashed_input
+            st.success("✅ أهلاً بك! تم تسجيل دخولك بنجاح. يتم الآن تحويلك لوحة التحكم...")
+            time.sleep(1)
             st.rerun()
+        else:
+            st.error("❌ كود الدخول غير صحيح أو غير مسجل.")
 
 # =========================================================
-# القسم الثالث: أدوات النمو الذكي (B2B)
+# الأقسام الداخلية (تظهر حصراً بعد تسجيل الدخول للعميل)
 # =========================================================
 elif nav_choice == "🚀 أدوات النمو الذكي (B2B)":
-    if st.session_state["current_logged_company"] is None:
-        st.warning("⚠️ يرجى تسجيل الدخول أولاً من قسم (تسجيل الدخول لحسابي) للوصول إلى أدواتك.")
-    else:
-        st.title("🚀 لوحة أدوات النمو وحملات البناء الآلي")
-        st.success("مساحة عملك محمية ومعزولة تماماً (AES-256).")
-        st.markdown("---")
-        
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            st.metric("العملاء المستهدفين لحملتك", "4,820 عميل", "نشط 🟢")
-        with col_b:
-            st.metric("الحملات النشطة", "2 حملات", "تجري الآن")
-        with col_c:
-            st.metric("معدل التحويل المتوقع", "18.4%", "مرتفع 🟢")
-        
-        st.info("💡 أدوات النمو مخصصة لتحليل وتوسيع نطاق عملك بشكل آلي وآمن.")
+    st.title("🚀 لوحة أدوات النمو وحملات البناء الآلي")
+    st.success("مساحة عملك محمية ومعزولة تماماً (AES-256).")
+    st.markdown("---")
+    
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.metric("العملاء المستهدفين لحملتك", "4,820 عميل", "نشط 🟢")
+    with col_b:
+        st.metric("الحملات النشطة", "2 حملات", "تجري الآن")
+    with col_c:
+        st.metric("معدل التحويل المتوقع", "18.4%", "مرتفع 🟢")
+    
+    st.info("💡 أدوات النمو مخصصة لتحليل وتوسيع نطاق عملك بشكل آلي وآمن.")
 
-# =========================================================
-# القسم الرابع: تحليل المنتجات والبيانات
-# =========================================================
 elif nav_choice == "📦 تحليل المنتجات والبيانات":
-    if st.session_state["current_logged_company"] is None:
-        st.warning("⚠️ يرجى تسجيل الدخول أولاً من قسم (تسجيل الدخول لحسابي) لاستخدام أداة تحليل المنتجات.")
-    else:
-        st.title("📦 مركز تحليل المنتجات والبيانات المتقدم")
-        st.write("ارفع ملفات منتجاتك أو قوائم الأسعار الخاصة بك ليقوم النظام بتحليلها واستخراج التوصيات التسويقية:")
-        st.markdown("---")
-        
-        uploaded_prod_file = st.file_uploader("ارفع ملف المنتجات (CSV, TXT):", type=["csv", "txt"])
-        if uploaded_prod_file is not None:
-            with st.spinner("جاري فحص الملف وتحليله عبر خوارزميات الذكاء الاصطناعي المخصصة..."):
-                time.sleep(1.5)
-            st.success("✅ تم تحليل منتجاتك بنجاح واستخراج استراتيجيات التسويق!")
-            if uploaded_prod_file.name.endswith('.csv'):
-                df_prod = pd.read_csv(uploaded_prod_file)
-                st.dataframe(df_prod.head(10))
-            else:
-                st.write("📈 **تقرير التحليل الفوري لمنتجك:** تم رصد نقاط القوة وتحديد الفئة المستهدفة بدقة.")
+    st.title("📦 مركز تحليل المنتجات والبيانات المتقدم")
+    st.write("ارفع ملفات منتجاتك أو قوائم الأسعار الخاصة بك ليقوم النظام بتحليلها واستخراج التوصيات التسويقية:")
+    st.markdown("---")
+    
+    uploaded_prod_file = st.file_uploader("ارفع ملف المنتجات (CSV, TXT):", type=["csv", "txt"])
+    if uploaded_prod_file is not None:
+        with st.spinner("جاري فحص الملف وتحليله عبر خوارزميات الذكاء الاصطناعي المخصصة..."):
+            time.sleep(1.5)
+        st.success("✅ تم تحليل منتجاتك بنجاح واستخراج استراتيجيات التسويق!")
+        if uploaded_prod_file.name.endswith('.csv'):
+            df_prod = pd.read_csv(uploaded_prod_file)
+            st.dataframe(df_prod.head(10))
+        else:
+            st.write("📈 **تقرير التحليل الفوري لمنتجك:** تم رصد نقاط القوة وتحديد الفئة المستهدفة بدقة.")
 
-# =========================================================
-# القسم الخامس: مستشار الذكاء الاصطناعي التخصصي
-# =========================================================
 elif nav_choice == "🤖 مستشار الذكاء الاصطناعي التخصصي":
-    if st.session_state["current_logged_company"] is None:
-        st.warning("⚠️ يرجى تسجيل الدخول أولاً من قسم (تسجيل الدخول لحسابي) للتحدث مع المستشار.")
-    else:
-        st.title("🤖 مستشار الذكاء الاصطناعي التخصصي لمنتجاتك")
-        st.write("اسأل خبير النمو الآلي عن استراتيجيات تسويق منتجاتك وكيفية مضاعفة مبيعاتك:")
-        st.markdown("---")
-        
-        comp_id = st.session_state["current_logged_company"]
-        if comp_id not in st.session_state["ai_chat_history"]:
-            st.session_state["ai_chat_history"][comp_id] = [
-                {"role": "assistant", "content": "أهلاً بك! أنا مستشارك الذكي المخصص لمنتجاتك. كيف يمكنني مساعدتك في تطوير مبيعاتك التسويقية اليوم؟"}
-            ]
-        
-        for msg in st.session_state["ai_chat_history"][comp_id]:
-            with st.chat_message(msg["role"]):
-                st.write(msg["content"])
-                
-        user_query = st.chat_input("اطرح سؤالك أو خطتك التسويقية...")
-        if user_query:
-            st.session_state["ai_chat_history"][comp_id].append({"role": "user", "content": user_query})
-            with st.chat_message("user"):
-                st.write(user_query)
+    st.title("🤖 مستشار الذكاء الاصطناعي التخصصي لمنتجاتك")
+    st.write("اسأل خبير النمو الآلي عن استراتيجيات تسويق منتجاتك وكيفية مضاعفة مبيعاتك:")
+    st.markdown("---")
+    
+    comp_id = st.session_state["current_logged_company"]
+    if comp_id not in st.session_state["ai_chat_history"]:
+        st.session_state["ai_chat_history"][comp_id] = [
+            {"role": "assistant", "content": "أهلاً بك! أنا مستشارك الذكي المخصص لمنتجاتك. كيف يمكنني مساعدتك في تطوير مبيعاتك التسويقية اليوم؟"}
+        ]
+    
+    for msg in st.session_state["ai_chat_history"][comp_id]:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
             
-            ai_reply = f"بناءً على طبيعة منتجاتك وبيانات السوق، أقترح تنفيذ الآتي بخصوص طلبك: '{user_query}' لضمان أعلى عائد ربحي."
-            st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
-            with st.chat_message("assistant"):
-                st.write(ai_reply)
+    user_query = st.chat_input("اطرح سؤالك أو خطتك التسويقية...")
+    if user_query:
+        st.session_state["ai_chat_history"][comp_id].append({"role": "user", "content": user_query})
+        with st.chat_message("user"):
+            st.write(user_query)
+        
+        ai_reply = f"بناءً على طبيعة منتجاتك وبيانات السوق، أقترح تنفيذ الآتي بخصوص طلبك: '{user_query}' لضمان أعلى عائد ربحي."
+        st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
+        with st.chat_message("assistant"):
+            st.write(ai_reply)
+
+elif nav_choice == "🚪 تسجيل الخروج":
+    st.session_state["current_logged_company"] = None
+    st.success("✅ تم تسجيل الخروج بنجاح.")
+    time.sleep(1)
+    st.rerun()

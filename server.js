@@ -25,7 +25,6 @@ const transporter = nodemailer.createTransport({
 
 async function crawlAndExtractContact(companyWebsite, companyId) {
   const contactPageUrl = `${companyWebsite.replace(/\/$/, '')}/contact`;
-  
   try {
     const response = await axios.get(contactPageUrl, { timeout: 4000 });
     const $ = cheerio.load(response.data);
@@ -65,20 +64,15 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
           <h2 style="color: #1e3a8a; text-align: center;">⚡ منصة النمو الذكي وتوليد العملاء</h2>
           <p>مرحباً فريق <strong>${companyName}</strong>،</p>
           <p>قمنا بزيارة موقعكم عبر صفحة اتصل بنا، واكتشفنا فرصاً ضخمة لمضاعفة مبيعاتكم عبر محرك النمو الأوتوماتيكي الخاص بنا (يعمل 24/7).</p>
-          
           <div style="background-color: #f8fafc; border-right: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 4px;">
             <h3 style="margin-top: 0; color: #047857;">💳 تفاصيل الاشتراك والتفعيل الفوري ($200/شهر):</h3>
             <p>للاشتراك الفوري وتفعيل نظامك المعزول، يرجى التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b> إلى المحفظة المعتمدة:</p>
-            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">
-              ${wallet}
-            </p>
+            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">${wallet}</p>
             <p style="text-align: center; margin-top: 15px;">
               <a href="${platformUrl}" target="_blank" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">🌐 زيارة المنصة وبوابة الدفع</a>
             </p>
           </div>
-
           <p>بعد إتمام التحويل، أرسل رقم المعاملة (TXID) عبر موقعنا ليتم تفعيل حسابك أوتوماتيكياً خلال ثوانٍ.</p>
-          
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
           <p style="font-size: 12px; color: #64748b; text-align: center;">AI Growth & B2B Scaling Team</p>
         </div>
@@ -92,20 +86,15 @@ function getLocalizedEmailContent(companyName, platformUrl, wallet, lang) {
           <h2 style="color: #1e3a8a; text-align: center;">⚡ AI Growth & Client Acquisition Platform</h2>
           <p>Hello team at <strong>${companyName}</strong>,</p>
           <p>Our autonomous growth crawler visited your contact channel and identified high potential for automated B2B scaling.</p>
-          
           <div style="background-color: #f8fafc; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 4px;">
             <h3 style="margin-top: 0; color: #047857;">💳 Instant Subscription ($200/month):</h3>
             <p>To activate your secure environment, transfer exclusively via <b>BNB Smart Chain (BEP20)</b> to our wallet:</p>
-            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">
-              ${wallet}
-            </p>
+            <p style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; text-align: center; border-radius: 4px; word-break: break-all;">${wallet}</p>
             <p style="text-align: center; margin-top: 15px;">
               <a href="${platformUrl}" target="_blank" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">🌐 Visit Platform & Activate</a>
             </p>
           </div>
-
           <p>Send your TXID after payment for instant automated provisioning.</p>
-          
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
           <p style="font-size: 12px; color: #64748b; text-align: center;">AI Growth & Scaling Team</p>
         </div>

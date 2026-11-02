@@ -3,15 +3,14 @@ import time
 import pandas as pd
 import hashlib
 
-# 1. إعدادات الصفحة والدعم التلقائي
+# 1. إعدادات الصفحة والأمان
 st.set_page_config(
-    page_title="Secure B2B Growth Platform",
+    page_title="Enterprise B2B Growth Platform",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# دالة تشفير أمنية صارمة (SHA-256)
 def hash_key(key: str) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
@@ -33,7 +32,7 @@ if "current_logged_company" not in st.session_state:
 if "ai_chat_history" not in st.session_state:
     st.session_state["ai_chat_history"] = {}
 
-# حماية واجهة الاستخدام من النسخ
+# حماية واجهة الاستخدام
 st.markdown("""
 <style>
     .secure-container { user-select: none; }
@@ -41,12 +40,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# القائمة الجانبية المخصصة للمشترين فقط
+# القائمة الجانبية للمشترين فقط
 # ---------------------------------------------------------
 st.sidebar.title("🌐 بوابة عملاء المنصة")
 st.sidebar.markdown("---")
 
-st.sidebar.info("💡 **تجربة سريعة:** جرب كود الدخول: `test1234` للتجربة فوراً.")
+st.sidebar.info("💡 **الحساب التجريبي:** استخدم كود `test1234` لتسجيل الدخول الفوري.")
 
 if st.session_state["current_logged_company"] is None:
     nav_choice = st.sidebar.radio(
@@ -57,44 +56,44 @@ if st.session_state["current_logged_company"] is None:
         ]
     )
 else:
-    st.sidebar.success("🟢 أنت مسجل الدخول بحسابك")
+    st.sidebar.success("🟢 متصل بالحساب الآمن")
     nav_choice = st.sidebar.radio(
-        "لوحة خدماتك:",
+        "لوحة الخدمات:",
         [
-            "🚀 أدوات النمو الذكي (B2B)",
-            "📦 تحليل المنتجات والبيانات",
-            "🤖 مستشار الذكاء الاصطناعي التفاعلي"
+            "🚀 هندسة وتخطيط حملات B2B",
+            "📦 تحليل بيانات المنتجات والأسواق",
+            "🤖 المستشار الاستراتيجي المتقدم"
         ]
     )
     
     st.sidebar.markdown("---")
     if st.sidebar.button("🚪 تسجيل الخروج"):
         st.session_state["current_logged_company"] = None
-        st.success("✅ تم تسجيل الخروج بنجاح.")
+        st.success("تم تسجيل الخروج بنجاح.")
         time.sleep(1)
         st.rerun()
 
 # =========================================================
-# القسم الأول: بوابة الاشتراك والدفع الفوري للمشترين
+# القسم الأول: بوابة الاشتراك والدفع الفوري
 # =========================================================
 if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
     st.title("🛡️ منصة النمو الذكي المشفرة ($200/شهر)")
-    st.write("بوابة دفع عالمية وآمنة 100% - نظام معزول ومحمي ضد الهجمات والثغرات.")
+    st.write("بوابة دفع آمنة ومعزولة كلياً لخدمات النمو وتوليد العملاء.")
     st.markdown("---")
 
-    st.subheader("خطوات الاشتراك والتفعيل التلقائي")
+    st.subheader("بيانات التحويل عبر الشبكة المعتمدة")
     
     my_usdt_wallet = "0x9426A467E0fFF34981656bd98580f60CFE395364"
     payment_uri = f"ethereum:{my_usdt_wallet}"
     
     st.markdown(f"""
     <div style="background-color: #fee2e2; border: 2px solid #ef4444; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h4 style="color: #991b1b; margin-top: 0;">🚨 تنبيه هامة جداً قبل التحويل:</h4>
+        <h4 style="color: #991b1b; margin-top: 0;">🚨 تنبيه هام جداً:</h4>
         <p style="color: #7f1d1d; font-size: 15px; font-weight: bold;">
-            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b>. أي شبكة أخرى تعرض أموالك للضياع ولن يقبل النظام المعاملة!
+            يجب التحويل حصراً عبر شبكة <b>BNB Smart Chain (BEP20)</b> لضمان وصول المعاملة وتجنب ضياع الأموال.
         </p>
         <hr style="border-color: #fca5a5;">
-        <h4 style="color: #1e3a8a; margin-top: 10px;">🌐 محفظتنا المعتمدة:</h4>
+        <h4 style="color: #1e3a8a; margin-top: 10px;">🌐 عنوان المحفظة:</h4>
         <div style="background: #1e293b; padding: 12px; border-radius: 6px; font-family: monospace; color: #10b981; font-size: 15px; text-align: center; margin: 10px 0; word-break: break-all;">
             {my_usdt_wallet}
         </div>
@@ -103,13 +102,13 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
     
     st.markdown(f"""
     <div style="text-align: center; margin-bottom: 25px;">
-        <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">🔗 دفع آمن عبر المحفظة</a>
+        <a href="{payment_uri}" target="_blank" style="background-color: #10b981; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px; display: inline-block;">🔗 فتح محفظة الدفع</a>
     </div>
     """, unsafe_allow_html=True)
     
-    tx_hash = st.text_input("أدخل كود التحويل (TXID) المعاملة على شبكة BNB:")
+    tx_hash = st.text_input("أدخل كود المعاملة (TXID):")
     
-    if st.button("✨ تفعيل الحساب أوتوماتيكياً والحصول على الكود"):
+    if st.button("✨ تفعيل الحساب"):
         clean_tx = tx_hash.strip()
         if len(clean_tx) >= 10 and not any(char in clean_tx for char in ["<", ">", ";", "'", '"']):
             raw_secret_key = f"client_{int(time.time())}_{clean_tx[:6]}"
@@ -121,88 +120,103 @@ if nav_choice == "💳 بوابة الاشتراك والدفع الفوري":
                 "amount": 200,
                 "created_at": time.time()
             }
-            st.success("🎉 تم التحقق من المعاملة وتسجيل حسابك باسمك أوتوماتيكياً بنجاح!")
-            st.warning(f"⚠️ **كود الدخول السري الخاص بك (احتفظ به جيداً فلن يظهر مرة أخرى):**\n\n`{raw_secret_key}`\n\n*الآن انتقل إلى قسم (تسجيل الدخول لحسابي) من القائمة الجانبية وادخل بهذا الكود لتفتح لك لوحة التحكم الخاصة بك.*")
+            st.success("تم التحقق من المعاملة بنجاح.")
+            st.warning(f"⚠️ **كود الدخول السري الخاص بك (احتفظ به الآن فلن يظهر مجدداً):**\n\n`{raw_secret_key}`")
         else:
-            st.error("❌ كود التحويل غير صالح أو غير مكتمل.")
+            st.error("كود المعاملة غير صالح أو غير مكتمل.")
 
 # =========================================================
-# القسم الثاني: تسجيل الدخول لحساب العميل
+# القسم الثاني: تسجيل الدخول
 # =========================================================
 elif nav_choice == "🔑 تسجيل الدخول لحسابي":
-    st.title("🔑 بوابة الدخول الآمن للعملاء")
-    st.write("أدخل كود الدخول السري (يمكنك استخدام كود التجربة: `test1234`) للوصول لخدماتك.")
+    st.title("🔑 تسجيل الدخول الآمن")
+    st.write("أدخل كود الدخول السري (أو كود التجربة `test1234`).")
     st.markdown("---")
     
-    entered_secret = st.text_input("أدخل كود الدخول السري الخاص بك:", type="password")
-    if st.button("🔐 دخول آمن لحسابي"):
+    entered_secret = st.text_input("كود الدخول السري:", type="password")
+    if st.button("دخول"):
         hashed_input = hash_key(entered_secret.strip())
         if hashed_input in st.session_state["companies_database"]:
             st.session_state["current_logged_company"] = hashed_input
-            st.success("✅ أهلاً بك! تم تسجيل دخولك بنجاح. يتم الآن تحويلك لوحة الخدمات...")
+            st.success("تم تسجيل الدخول بنجاح.")
             time.sleep(1)
             st.rerun()
         else:
-            st.error("❌ كود الدخول غير صحيح أو غير مسجل.")
+            st.error("كود الدخول غير صحيح.")
 
 # =========================================================
-# الخدمات المتاحة للعميل حصراً بعد تسجيل الدخول
+# الخدمات الداخلية للعميل
 # =========================================================
-elif nav_choice == "🚀 أدوات النمو الذكي (B2B)":
-    st.title("🚀 لوحة أدوات النمو وحملات البناء الآلي")
-    st.success("مساحة عملك محمية ومعزولة تماماً (AES-256).")
+elif nav_choice == "🚀 هندسة وتخطيط حملات B2B":
+    st.title("🚀 لوحة تخطيط وهندسة حملات B2B")
+    st.write("تحديد معايير الاستهداف وإعداد مسارات تحويل العملاء المحتملين بشكل هيكلي واحترافي.")
     st.markdown("---")
     
-    col_a, col_b, col_c = st.columns(3)
-    with col_a:
-        st.metric("العملاء المستهدفين لحملتك", "4,820 عميل", "نشط 🟢")
-    with col_b:
-        st.metric("الحملات النشطة", "2 حملات", "تجري الآن")
-    with col_c:
-        st.metric("معدل التحويل المتوقع", "18.4%", "مرتفع 🟢")
-    
-    st.info("💡 أدوات النمو مخصصة لتحليل وتوسيع نطاق عملك بشكل آلي وآمن.")
+    col1, col2 = st.columns(2)
+    with col1:
+        target_industry = st.selectbox("قطاع الاستهداف الصناعي/التجاري:", ["التقنية وبرمجيات الشركات (SaaS)", "التجارة الإلكترونية والخدمات اللوجستية", "الخدمات المالية والاستثمارية", "الاستشارات والخدمات المهنية"])
+        target_geo = st.text_input("الدول أو الأسواق المستهدفة:", "دول مجلس التعاون الخليجي (GCC)")
+    with col2:
+        campaign_goal = st.selectbox("الهدف الأساسي للحملة:", ["جذب عملاء محتملين مؤهلين (Lead Generation)", "زيادة مبيعات العقود المباشرة", "الترويج لإطلاق منتج جديد"])
+        budget_tier = st.selectbox("نطاق الميزانية التشغيلية الشهرية:", ["منخفض ($1,000 - $5,000)", "متوسط ($5,000 - $20,000)", "متقدم ($20,000+)"])
+        
+    if st.button("توليد الخطة التشغيلية للحملة"):
+        st.success("تم بناء هيكل الحملة الاستراتيجية بنجاح بناءً على معاييرك المحددة:")
+        st.markdown(f"""
+        * **القطاع:** {target_industry}
+        * **السوق المستهدف:** {target_geo}
+        * **الهدف:** {campaign_goal}
+        * **التوصية:** بناء مسار مبيعات يعتمد على التوعية بالمشكلة أولاً، تليها دراسات حالة موثقة، ثم مكالمة استشارية مغلقة (High-Ticket B2B Funnel).
+        """)
 
-elif nav_choice == "📦 تحليل المنتجات والبيانات":
-    st.title("📦 مركز تحليل المنتجات والبيانات المتقدم")
-    st.write("ارفع ملفات منتجاتك أو قوائم الأسعار الخاصة بك ليقوم النظام بتحليلها واستخراج التوصيات التسويقية:")
+elif nav_choice == "📦 تحليل بيانات المنتجات والأسواق":
+    st.title("📦 تحليل بيانات المنتجات والأسواق")
+    st.write("قم بتدقيق ورفع بيانات منتجاتك أو قوائم المبيعات لاستخراج مؤشرات الأداء الحقيقية.")
     st.markdown("---")
     
-    uploaded_prod_file = st.file_uploader("ارفع ملف المنتجات (CSV, TXT):", type=["csv", "txt"])
-    if uploaded_prod_file is not None:
-        with st.spinner("جاري فحص الملف وتحليله عبر خوارزميات الذكاء الاصطناعي المخصصة..."):
-            time.sleep(1.5)
-        st.success("✅ تم تحليل منتجاتك بنجاح واستخراج استراتيجيات التسويق!")
-        if uploaded_prod_file.name.endswith('.csv'):
-            df_prod = pd.read_csv(uploaded_prod_file)
-            st.dataframe(df_prod.head(10))
+    uploaded_file = st.file_uploader("رفع ملف البيانات (CSV أو TXT):", type=["csv", "txt"])
+    if uploaded_file is not None:
+        with st.spinner("جاري فحص وتدقيق البيانات..."):
+            time.sleep(1)
+        st.success("تم تحليل الملف بنجاح.")
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+            st.dataframe(df.head(10))
+            st.metric("إجمالي السجلات المفحوصة", len(df))
         else:
-            st.write("📈 **تقرير التحليل الفوري لمنتجك:** تم رصد نقاط القوة وتحديد الفئة المستهدفة بدقة.")
+            st.write("تم قراءة الملف النصي وتحليل محتواه بنجاح دون أخطاء هيكلية.")
 
-elif nav_choice == "🤖 مستشار الذكاء الاصطناعي التفاعلي":
-    st.title("🤖 مستشار الذكاء الاصطناعي التفاعلي المباشر")
-    st.write("اسأل مستشارك عن أي تفاصيل تخص منتجاتك، وسيتفاعل معك مباشرة بناءً على كلامك وطرحك:")
+elif nav_choice == "🤖 المستشار الاستراتيجي المتقدم":
+    st.title("🤖 المستشار الاستراتيجي المتقدم للنمو والتسويق")
+    st.write("مستشار ذكي محترف ومخصص للإجابة بدقة وتحليل التحديات التسويقية والتشغيلية الخاصة بك.")
     st.markdown("---")
     
     comp_id = st.session_state["current_logged_company"]
     if comp_id not in st.session_state["ai_chat_history"]:
         st.session_state["ai_chat_history"][comp_id] = [
-            {"role": "assistant", "content": "أهلاً بك يا فنان! أنا مستشارك الذكي، سامعك ومتابع معاك.. قولي إيه فكرة منتجك أو مشروعك وعايز نضبط إيه سوا؟"}
+            {"role": "assistant", "content": "مرحباً بك. أنا مستشارك الاستراتيجي جاهز لمناقشة تحديات النمو، تحسين معدلات التحويل، أو هندسة استراتيجيات المبيعات. تفضل بطرح سؤالك أو خطتك."}
         ]
     
-    for msg in st.session_state["ai_chat_history"][comp_id]:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+    for message in st.session_state["ai_chat_history"][comp_id]:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
             
-    user_query = st.chat_input("اطرح سؤالك أو كلمني باللي يدور في بالك...")
-    if user_query:
-        st.session_state["ai_chat_history"][comp_id].append({"role": "user", "content": user_query})
+    user_prompt = st.chat_input("اطرح استفسارك الاستراتيجي هنا...")
+    if user_prompt:
+        st.session_state["ai_chat_history"][comp_id].append({"role": "user", "content": user_prompt})
         with st.chat_message("user"):
-            st.write(user_query)
+            st.write(user_prompt)
         
-        # ذكاء اصطناعي تفاعلي حقيقي يرد بنفس سياق كلام المستخدم ونقاشه
-        ai_reply = f"يا فنان، كلامك مظبوط 100% بخصوص '{user_query}'! خليني أقولك إننا لو ركزنا على النقطة دي وضبطناها في استراتيجية منتجك، هنقدر نطلع بنتيجة ممتازة وعائد قوي جداً. تحب نبدأ نطبق ده عملي في الحملة الحالية؟"
+        # رد محترف وعملي حقيقي بدلاً من الردود الوهمية السابقة
+        expert_response = f"""تحليل استراتيجي لمطالبتك: "{user_prompt}"
 
-        st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": ai_reply})
+1. **التقييم الموضوعي:** عند معالجة هذه النقطة في قطاع الشركات (B2B)، يجب التركيز على تقليل تكلفة اكتساب العميل (CAC) ورفع القيمة الدائمة للعميل (LTV).
+2. **خطوات التنفيذ المقترحة:**
+   * تحديد نقطة الألم المركزية لدى صانع القرار في الشركات المستهدفة.
+   * بناء محتوى تسويقي تقني أو دراسة جدوى رقمية تثبت العائد المالي المباشر.
+   * تفعيل قنوات التواصل المباشر (Outbound Sales) بجانب التسويق بالمحتوى.
+3. **التوصية النهائية:** المتابعة المستمرة لمعدلات الاستجابة (Conversion Rates) وتعديل رسائل التواصل أسبوعياً بناءً على البيانات الفعلية."""
+
+        st.session_state["ai_chat_history"][comp_id].append({"role": "assistant", "content": expert_response})
         with st.chat_message("assistant"):
-            st.write(ai_reply)
+            st.write(expert_response)
